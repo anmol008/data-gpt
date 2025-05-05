@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { WorkspaceWithDocuments } from "@/types/api";
@@ -23,7 +24,7 @@ import {
 import WorkspaceDialog from "./WorkspaceDialog";
 
 const Sidebar = () => {
-  const { workspaces, selectedWorkspace, selectWorkspace } = useWorkspace();
+  const { workspaces, selectedWorkspace, selectWorkspace, deleteWorkspace } = useWorkspace();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [editWorkspace, setEditWorkspace] =
@@ -48,18 +49,28 @@ const Sidebar = () => {
     setEditWorkspace(workspace);
   };
 
+  const handleDeleteClick = async (
+    workspace: WorkspaceWithDocuments,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    if (workspace.ws_id) {
+      await deleteWorkspace(workspace.ws_id);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white border-r border-gray-200 w-72 overflow-hidden">
       {/* Logo */}
-      <div className="p-4 border-b border-gray-200">
-        <h1 className="text-2xl font-semibold text-datagpt-blue">DataGPT</h1>
+      <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600">
+        <h1 className="text-2xl font-semibold text-white">DataGPT</h1>
       </div>
 
       {/* New Workspace Button */}
       <div className="px-3 py-3">
         <Button
           onClick={() => setCreateDialogOpen(true)}
-          className="w-full bg-datagpt-blue hover:bg-datagpt-dark-blue text-white rounded-md h-10"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 shadow-sm transition-all duration-200 flex items-center justify-center"
         >
           <Plus className="h-5 w-5 mr-2" /> New Workspace
         </Button>
@@ -73,7 +84,7 @@ const Sidebar = () => {
             placeholder="Search workspaces..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-gray-50 border-gray-200"
+            className="pl-9 bg-gray-50 border-gray-200 focus-visible:ring-blue-500"
           />
         </div>
       </div>
@@ -85,49 +96,42 @@ const Sidebar = () => {
         </div>
 
         {/* Workspace List */}
-        <div className="space-y-1 mt-2">
+        <div className="space-y-1 mt-2 overflow-y-auto max-h-[calc(100vh-240px)]">
           {filteredWorkspaces.map((workspace) => (
             <div
               key={workspace.ws_id}
               onClick={() => handleWorkspaceClick(workspace)}
-              className={`flex items-start justify-between p-2 rounded-md cursor-pointer group ${
+              className={`flex items-start justify-between p-2 rounded-md cursor-pointer group transition-colors duration-200 ${
                 selectedWorkspace?.ws_id === workspace.ws_id
-                  ? "bg-datagpt-gray"
-                  : "hover:bg-gray-50"
+                  ? "bg-blue-50 border-l-4 border-blue-500"
+                  : "hover:bg-gray-50 border-l-4 border-transparent"
               }`}
             >
               <div className="flex items-start space-x-2">
-                <FileText className="h-5 w-5 mt-0.5 text-datagpt-blue" />
+                <FileText className={`h-5 w-5 mt-0.5 ${selectedWorkspace?.ws_id === workspace.ws_id ? "text-blue-500" : "text-gray-400"}`} />
                 <div>
                   <p className="text-sm font-medium">{workspace.ws_name}</p>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    {workspace.messageCount} messages • {workspace.fileCount}{" "}
-                    files
+                    {workspace.messageCount || 0} messages • {workspace.documents?.length || 0} files
                   </div>
                 </div>
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button>...</Button>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={(e) => handleEditClick(workspace, e)}
-                  >
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem onClick={(e) => handleEditClick(workspace, e)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (workspace.ws_id) {
-                        const { deleteWorkspace } = useWorkspace();
-                        deleteWorkspace(workspace.ws_id);
-                      }
-                    }}
+                    className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                    onClick={(e) => handleDeleteClick(workspace, e)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     <span>Delete</span>
@@ -140,14 +144,14 @@ const Sidebar = () => {
       </div>
 
       {/* Footer Stats */}
-      <div className="mt-auto border-t border-gray-200 p-3">
+      <div className="mt-auto border-t border-gray-200 p-3 bg-gray-50">
         <div className="flex items-center justify-between text-sm text-gray-600 py-1.5">
           <div className="flex items-center">
-            <FileText className="h-5 w-5 mr-2 text-datagpt-blue" />
+            <FileText className="h-5 w-5 mr-2 text-blue-500" />
             <span>Documents</span>
           </div>
           <span className="font-semibold">
-            {workspaces.reduce((sum, ws) => sum + ws.fileCount, 0)}
+            {workspaces.reduce((sum, ws) => sum + (ws.documents?.length || 0), 0)}
           </span>
         </div>
         <div className="flex items-center justify-between text-sm text-gray-600 py-1.5">
