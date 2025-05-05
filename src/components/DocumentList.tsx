@@ -10,8 +10,11 @@ interface DocumentListProps {
   onDelete?: (docId: number) => Promise<void>;
 }
 
-const DocumentList = ({ documents, onDelete }: DocumentListProps) => {
+const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
+  
+  // Ensure that documents is always an array
+  const documentArray = Array.isArray(documents) ? documents : [];
   
   const getFileIcon = (extension: string) => {
     return <FileText className="h-5 w-5 text-primary" />;
@@ -43,7 +46,7 @@ const DocumentList = ({ documents, onDelete }: DocumentListProps) => {
               <FolderClosed className="h-5 w-5 text-primary" />
             )}
             <h3 className="font-medium text-gray-800">
-              Documents ({documents.length})
+              Documents ({documentArray.length})
             </h3>
           </div>
           <span className="text-sm text-gray-500">
@@ -53,12 +56,12 @@ const DocumentList = ({ documents, onDelete }: DocumentListProps) => {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="divide-y divide-gray-100">
-          {documents.length === 0 ? (
+          {documentArray.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               No documents available
             </div>
           ) : (
-            documents.map((doc) => (
+            documentArray.map((doc) => (
               <div 
                 key={doc.ws_doc_id} 
                 className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
