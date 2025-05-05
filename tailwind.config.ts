@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				poppins: ['Poppins', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -30,9 +33,9 @@ export default {
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				datagpt: {
-					blue: '#3b82f6',
-					'light-blue': '#60a5fa',
-					'dark-blue': '#2563eb',
+					blue: '#7c4dff',
+					'light-blue': '#9e7dff',
+					'dark-blue': '#5e35b1',
 					gray: '#f3f4f6',
 					'dark-gray': '#9ca3af'
 				},
