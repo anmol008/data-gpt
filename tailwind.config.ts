@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -27,6 +28,13 @@ export default {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
+				},
+				datagpt: {
+					blue: '#3b82f6',
+					'light-blue': '#60a5fa',
+					'dark-blue': '#2563eb',
+					gray: '#f3f4f6',
+					'dark-gray': '#9ca3af'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
