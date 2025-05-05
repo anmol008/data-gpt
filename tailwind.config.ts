@@ -33,11 +33,14 @@ export default {
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				datagpt: {
-					blue: '#7c4dff',
-					'light-blue': '#9e7dff',
-					'dark-blue': '#5e35b1',
+					blue: '#0A66C2',  // Updated primary color
+					'light-blue': '#3b82f6',
+					'dark-blue': '#0a4d99',
+					teal: '#1ABC9C',  // Accent color
+					purple: '#A259FF',  // CTA button color
 					gray: '#f3f4f6',
-					'dark-gray': '#9ca3af'
+					'dark-gray': '#2C2C2E',  // Text color
+					'light-gray': '#9ca3af'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

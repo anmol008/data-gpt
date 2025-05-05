@@ -64,8 +64,8 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
             key={`${file.name}-${index}`}
             className="flex items-center bg-gray-100 border border-gray-200 rounded-md p-2 pr-1"
           >
-            <File className="h-4 w-4 text-primary mr-2" />
-            <span className="text-sm text-gray-700 truncate max-w-[150px]">
+            <File className="h-4 w-4 text-[#0A66C2] mr-2" />
+            <span className="text-sm text-[#2C2C2E] truncate max-w-[150px]">
               {file.name}
             </span>
             <Button
@@ -86,7 +86,7 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
           type="button"
           onClick={handleUploadClick}
           disabled={disabled}
-          className="bg-primary hover:bg-primary/90 text-white"
+          className="bg-[#A259FF] hover:bg-[#A259FF]/90 text-white"
         >
           <Upload className="h-4 w-4 mr-2" />
           Upload PDF{selectedFiles.length > 0 ? "s" : ""}

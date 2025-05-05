@@ -17,7 +17,7 @@ const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
   const documentArray = Array.isArray(documents) ? documents : [];
   
   const getFileIcon = (extension: string) => {
-    return <FileText className="h-5 w-5 text-primary" />;
+    return <FileText className="h-5 w-5 text-[#0A66C2]" />;
   };
   
   const handleDelete = async (e: React.MouseEvent, docId: number) => {
@@ -41,11 +41,11 @@ const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
         <div className="flex items-center justify-between p-4 bg-white cursor-pointer hover:bg-gray-50">
           <div className="flex items-center space-x-2">
             {isOpen ? (
-              <FolderOpen className="h-5 w-5 text-primary" />
+              <FolderOpen className="h-5 w-5 text-[#0A66C2]" />
             ) : (
-              <FolderClosed className="h-5 w-5 text-primary" />
+              <FolderClosed className="h-5 w-5 text-[#0A66C2]" />
             )}
-            <h3 className="font-medium text-gray-800">
+            <h3 className="font-medium text-[#2C2C2E]">
               Documents ({documentArray.length})
             </h3>
           </div>
@@ -69,7 +69,7 @@ const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
                 <div className="flex items-center space-x-3">
                   {getFileIcon(doc.ws_doc_extn)}
                   <div>
-                    <p className="font-medium text-gray-700">{doc.ws_doc_name}</p>
+                    <p className="font-medium text-[#2C2C2E]">{doc.ws_doc_name}</p>
                     <p className="text-xs text-gray-500">
                       {doc.ws_doc_extn.toUpperCase()} • Added {new Date().toLocaleDateString()}
                     </p>
