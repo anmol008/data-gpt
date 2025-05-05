@@ -1,31 +1,49 @@
-
-import React, { useState } from 'react';
-import { useWorkspace } from '@/context/WorkspaceContext';
-import { WorkspaceWithDocuments } from '@/types/api';
-import { Dialog } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu } from '@/components/ui/dropdown-menu';
-import { Folder, FileText, Plus, Search, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import WorkspaceDialog from './WorkspaceDialog';
+import React, { useState } from "react";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { WorkspaceWithDocuments } from "@/types/api";
+import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Folder,
+  FileText,
+  Plus,
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import WorkspaceDialog from "./WorkspaceDialog";
 
 const Sidebar = () => {
   const { workspaces, selectedWorkspace, selectWorkspace } = useWorkspace();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editWorkspace, setEditWorkspace] = useState<WorkspaceWithDocuments | null>(null);
+  const [editWorkspace, setEditWorkspace] =
+    useState<WorkspaceWithDocuments | null>(null);
 
   // Filter workspaces based on search query
   const filteredWorkspaces = searchQuery
-    ? workspaces.filter(ws => 
-        ws.ws_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? workspaces.filter((ws) =>
+        ws.ws_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : workspaces;
 
   const handleWorkspaceClick = (workspace: WorkspaceWithDocuments) => {
     selectWorkspace(workspace);
   };
 
-  const handleEditClick = (workspace: WorkspaceWithDocuments, e: React.MouseEvent) => {
+  const handleEditClick = (
+    workspace: WorkspaceWithDocuments,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
     setEditWorkspace(workspace);
   };
@@ -36,17 +54,17 @@ const Sidebar = () => {
       <div className="p-4 border-b border-gray-200">
         <h1 className="text-2xl font-semibold text-datagpt-blue">DataGPT</h1>
       </div>
-      
+
       {/* New Workspace Button */}
       <div className="px-3 py-3">
-        <Button 
+        <Button
           onClick={() => setCreateDialogOpen(true)}
           className="w-full bg-datagpt-blue hover:bg-datagpt-dark-blue text-white rounded-md h-10"
         >
           <Plus className="h-5 w-5 mr-2" /> New Workspace
         </Button>
       </div>
-      
+
       {/* Search Box */}
       <div className="px-3 mb-2">
         <div className="relative">
@@ -59,23 +77,23 @@ const Sidebar = () => {
           />
         </div>
       </div>
-      
+
       {/* Workspaces Section */}
       <div className="px-3 py-2">
         <div className="flex items-center text-sm font-medium text-gray-500 mb-2">
           <Folder className="h-4 w-4 mr-2" /> WORKSPACES
         </div>
-        
+
         {/* Workspace List */}
         <div className="space-y-1 mt-2">
           {filteredWorkspaces.map((workspace) => (
-            <div 
-              key={workspace.ws_id} 
+            <div
+              key={workspace.ws_id}
               onClick={() => handleWorkspaceClick(workspace)}
               className={`flex items-start justify-between p-2 rounded-md cursor-pointer group ${
-                selectedWorkspace?.ws_id === workspace.ws_id 
-                  ? 'bg-datagpt-gray' 
-                  : 'hover:bg-gray-50'
+                selectedWorkspace?.ws_id === workspace.ws_id
+                  ? "bg-datagpt-gray"
+                  : "hover:bg-gray-50"
               }`}
             >
               <div className="flex items-start space-x-2">
@@ -83,45 +101,44 @@ const Sidebar = () => {
                 <div>
                   <p className="text-sm font-medium">{workspace.ws_name}</p>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    {workspace.messageCount} messages • {workspace.fileCount} files
+                    {workspace.messageCount} messages • {workspace.fileCount}{" "}
+                    files
                   </div>
                 </div>
               </div>
-              
+
               <DropdownMenu>
-                <DropdownMenu.Trigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
-                    onClick={(e) => e.stopPropagation()}
+                <DropdownMenuTrigger asChild>
+                  <Button>...</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={(e) => handleEditClick(workspace, e)}
                   >
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Open menu</span>
-                  </Button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content align="end">
-                  <DropdownMenu.Item onClick={(e) => handleEditClick(workspace, e as React.MouseEvent)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Separator />
-                  <DropdownMenu.Item className="text-red-600" onClick={(e) => {
-                    e.stopPropagation();
-                    if (workspace.ws_id) {
-                      const { deleteWorkspace } = useWorkspace();
-                      deleteWorkspace(workspace.ws_id);
-                    }
-                  }}>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (workspace.ws_id) {
+                        const { deleteWorkspace } = useWorkspace();
+                        deleteWorkspace(workspace.ws_id);
+                      }
+                    }}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" />
                     <span>Delete</span>
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </div>
           ))}
         </div>
       </div>
-      
+
       {/* Footer Stats */}
       <div className="mt-auto border-t border-gray-200 p-3">
         <div className="flex items-center justify-between text-sm text-gray-600 py-1.5">
@@ -138,7 +155,7 @@ const Sidebar = () => {
           <span className="font-semibold">12.4MB</span>
         </div>
       </div>
-      
+
       {/* Create/Edit Workspace Dialog */}
       <WorkspaceDialog
         isOpen={isCreateDialogOpen || !!editWorkspace}

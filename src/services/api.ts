@@ -1,7 +1,7 @@
 
 import { Workspace, Document, ApiResponse } from "@/types/api";
 
-const API_BASE_URL = "https://si.pearlit.in/v1";
+const API_BASE_URL = "https://si.pearlit.in/api/v1";
 const DEFAULT_USER_ID = 1;
 
 // Helper function to handle API responses
@@ -16,17 +16,18 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 // Workspace API endpoints
 export const workspaceApi = {
   getAll: async (): Promise<Workspace[]> => {
-    const response = await fetch(`${API_BASE_URL}/workspace`);
-    return handleResponse<Workspace[]>(response);
-  },
+    const response = await fetch(`${API_BASE_URL}/workspaces`);
+    const result = await handleResponse<{ data: Workspace[] }>(response);
+    return result.data;
+  },  
 
   getById: async (wsId: number): Promise<Workspace> => {
-    const response = await fetch(`${API_BASE_URL}/workspace?ws_id=${wsId}`);
+    const response = await fetch(`${API_BASE_URL}/workspaces?ws_id=${wsId}`);
     return handleResponse<Workspace>(response);
   },
 
   create: async (workspace: Workspace): Promise<ApiResponse<Workspace>> => {
-    const response = await fetch(`${API_BASE_URL}/workspace`, {
+    const response = await fetch(`${API_BASE_URL}/workspaces`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export const workspaceApi = {
   },
 
   update: async (workspace: Workspace): Promise<ApiResponse<Workspace>> => {
-    const response = await fetch(`${API_BASE_URL}/workspace`, {
+    const response = await fetch(`${API_BASE_URL}/workspaces`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
