@@ -20,6 +20,8 @@ const WorkspaceView = () => {
   
   // Clear selected files when workspace changes and fetch workspace documents
   useEffect(() => {
+    setSelectedFiles([]); // Clear selected files when workspace changes
+    
     if (selectedWorkspace?.ws_id) {
       fetchWorkspaceDocuments(selectedWorkspace.ws_id);
     } else {

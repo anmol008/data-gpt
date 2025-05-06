@@ -81,9 +81,17 @@ export const documentApi = {
     
     console.log(`Fetching documents with URL: ${url}`);
     const response = await fetch(url);
-    const data = await handleResponse<Document[]>(response);
-    console.log(`Fetched ${data.length} documents for workspace ${wsId}`);
-    return data;
+    const result = await handleResponse<{success: boolean, data: Document[]}>(response);
+    
+    // Check if the API response has the expected structure
+    if (result.success && Array.isArray(result.data)) {
+      console.log(`Fetched ${result.data.length} documents for workspace ${wsId}`);
+      return result.data;
+    } else {
+      console.log("API response structure doesn't match expected format:", result);
+      // If we didn't get the expected structure, return an empty array
+      return [];
+    }
   },
 
   getById: async (docId: number): Promise<Document> => {
