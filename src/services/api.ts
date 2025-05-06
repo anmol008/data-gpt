@@ -1,4 +1,3 @@
-
 import { Workspace, Document, ApiResponse } from "@/types/api";
 
 const API_BASE_URL = "https://si.pearlit.in/api/v1";
@@ -80,8 +79,11 @@ export const documentApi = {
       url += `?${params.join("&")}`;
     }
     
+    console.log(`Fetching documents with URL: ${url}`);
     const response = await fetch(url);
-    return handleResponse<Document[]>(response);
+    const data = await handleResponse<Document[]>(response);
+    console.log(`Fetched ${data.length} documents for workspace ${wsId}`);
+    return data;
   },
 
   getById: async (docId: number): Promise<Document> => {

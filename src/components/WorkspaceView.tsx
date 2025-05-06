@@ -3,22 +3,42 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, FileText, Send, File } from 'lucide-react';
+import { Upload, FileText, Send, FilePdf } from 'lucide-react';
 import { toast } from 'sonner';
 import DocumentList from './DocumentList';
 import MultiFileUpload from './MultiFileUpload';
+import { documentApi } from '@/services/api';
 
 const WorkspaceView = () => {
   const { selectedWorkspace, uploadDocument, deleteDocument, refreshWorkspaces } = useWorkspace();
   const [query, setQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [workspaceDocuments, setWorkspaceDocuments] = useState<any[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState<boolean>(false);
   
-  // Clear selected files when workspace changes
+  // Clear selected files when workspace changes and fetch workspace documents
   useEffect(() => {
     setSelectedFiles([]);
+    if (selectedWorkspace?.ws_id) {
+      fetchWorkspaceDocuments(selectedWorkspace.ws_id);
+    }
   }, [selectedWorkspace?.ws_id]);
   
+  // Fetch documents for the current workspace
+  const fetchWorkspaceDocuments = async (wsId: number) => {
+    try {
+      setIsLoadingDocs(true);
+      const docs = await documentApi.getAll(wsId);
+      setWorkspaceDocuments(docs);
+    } catch (error) {
+      console.error("Failed to fetch workspace documents:", error);
+      toast.error("Failed to load documents");
+    } finally {
+      setIsLoadingDocs(false);
+    }
+  };
+
   const handleFilesSelected = (files: File[]) => {
     setSelectedFiles(files);
   };
@@ -37,8 +57,10 @@ const WorkspaceView = () => {
       toast.success(`${selectedFiles.length} document${selectedFiles.length > 1 ? 's' : ''} uploaded successfully!`);
       setSelectedFiles([]); // Clear selected files after successful upload
       
-      // Refresh workspace data to show the newly uploaded documents
-      await refreshWorkspaces();
+      // Refresh documents for this workspace
+      if (selectedWorkspace?.ws_id) {
+        fetchWorkspaceDocuments(selectedWorkspace.ws_id);
+      }
     } catch (error) {
       console.error("Failed to upload PDFs:", error);
       toast.error("Failed to upload documents");
@@ -80,7 +102,7 @@ const WorkspaceView = () => {
       <div className="flex flex-col flex-grow p-4 md:p-6 bg-gray-50 overflow-auto">
         <div className="max-w-5xl mx-auto w-full">
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-medium text-[#2C2C2E] mb-4">Upload Documents</h2>
+            <h2 className="text-xl font-medium text-[#2C2C2E] mb-4">Upload Documents</h2>
             <MultiFileUpload 
               onFilesSelected={handleFilesSelected}
               disabled={uploading}
@@ -90,17 +112,24 @@ const WorkspaceView = () => {
           </div>
           
           {/* Document List - This will show documents from the API */}
-          {selectedWorkspace.documents && selectedWorkspace.documents.length > 0 && (
+          {workspaceDocuments.length > 0 && (
             <DocumentList 
-              documents={selectedWorkspace.documents} 
+              documents={workspaceDocuments} 
               onDelete={deleteDocument}
             />
           )}
           
+          {/* Loading state */}
+          {isLoadingDocs && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0A66C2]"></div>
+            </div>
+          )}
+          
           {/* Empty state */}
-          {(!selectedWorkspace.documents || selectedWorkspace.documents.length === 0) && !uploading && (
+          {!isLoadingDocs && workspaceDocuments.length === 0 && !uploading && (
             <div className="flex flex-col items-center justify-center py-8 bg-white rounded-lg shadow-sm border border-gray-100 text-center mt-6">
-              <File className="h-12 w-12 text-gray-300 mb-3" />
+              <FilePdf className="h-12 w-12 text-gray-300 mb-3" />
               <h2 className="text-lg font-medium text-[#2C2C2E] mb-1">No documents yet</h2>
               <p className="text-gray-500 max-w-md">
                 Upload PDF documents to start getting insights from your data.

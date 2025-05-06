@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { Upload, X, File, CheckCircle } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Upload, FilePdf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MultiFileUploadProps {
@@ -54,38 +54,28 @@ const MultiFileUpload = ({
     }
   };
   
-  const handleRemoveFile = (index: number) => {
-    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
-    onFilesSelected(updatedFiles);
-  };
-  
   return (
     <div className="w-full">
       {selectedFiles.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Selected Documents</h3>
-          <div className="flex flex-wrap gap-2">
+          <h3 className="text-lg font-medium text-[#2C2C2E] mb-2">Selected Documents</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
             {selectedFiles.map((file, index) => (
               <div 
                 key={`${file.name}-${index}`}
-                className="flex items-center bg-gray-50 border border-gray-200 rounded-md p-1.5 pl-2"
+                className="flex items-center bg-gray-50 border border-gray-200 rounded-md p-2"
               >
-                <File className="h-3.5 w-3.5 text-[#0A66C2] mr-1.5" />
-                <span className="text-xs text-[#2C2C2E] truncate max-w-[150px]">
+                <FilePdf className="h-4 w-4 text-[#0A66C2] mr-2" />
+                <span className="text-sm text-[#2C2C2E] truncate max-w-[150px]">
                   {file.name}
                 </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="ml-1 p-0 h-5 w-5 rounded-full hover:bg-gray-200"
-                  onClick={() => handleRemoveFile(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
               </div>
             ))}
           </div>
+          <p className="text-sm text-gray-500 mb-3">
+            {selectedFiles.length} document{selectedFiles.length !== 1 ? 's' : ''} selected. 
+            Click "Upload {selectedFiles.length} Document{selectedFiles.length !== 1 ? 's' : ''}" to complete the upload.
+          </p>
         </div>
       )}
       
@@ -97,7 +87,7 @@ const MultiFileUpload = ({
           className="bg-[#A259FF] hover:bg-[#A259FF]/90 text-white"
         >
           <Upload className="h-4 w-4 mr-2" />
-          Upload PDF{selectedFiles.length !== 1 ? "s" : ""}
+          Upload PDF
         </Button>
         
         {selectedFiles.length > 0 && onUploadSubmit && (
@@ -106,8 +96,8 @@ const MultiFileUpload = ({
             className="bg-[#0A66C2] hover:bg-[#0A66C2]/90 text-white"
             disabled={disabled}
           >
-            <File className="h-4 w-4 mr-2" />
-            Upload {selectedFiles.length} Document{selectedFiles.length !== 1 ? "s" : ""}
+            <FilePdf className="h-4 w-4 mr-2" />
+            Upload {selectedFiles.length} Document{selectedFiles.length !== 1 ? 's' : ''}
           </Button>
         )}
         
