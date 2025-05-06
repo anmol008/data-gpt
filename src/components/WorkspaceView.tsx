@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { Button } from '@/components/ui/button';
@@ -7,20 +8,22 @@ import { toast } from 'sonner';
 import DocumentList from './DocumentList';
 import MultiFileUpload from './MultiFileUpload';
 import { documentApi } from '@/services/api';
+import { Document } from '@/types/api';
 
 const WorkspaceView = () => {
   const { selectedWorkspace, uploadDocument, deleteDocument, refreshWorkspaces } = useWorkspace();
   const [query, setQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [workspaceDocuments, setWorkspaceDocuments] = useState<any[]>([]);
+  const [workspaceDocuments, setWorkspaceDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState<boolean>(false);
   
   // Clear selected files when workspace changes and fetch workspace documents
   useEffect(() => {
-    setSelectedFiles([]);
     if (selectedWorkspace?.ws_id) {
       fetchWorkspaceDocuments(selectedWorkspace.ws_id);
+    } else {
+      setWorkspaceDocuments([]);
     }
   }, [selectedWorkspace?.ws_id]);
   
@@ -29,6 +32,7 @@ const WorkspaceView = () => {
     try {
       setIsLoadingDocs(true);
       const docs = await documentApi.getAll(wsId);
+      console.log(`Fetched ${docs.length} documents for workspace ${wsId}:`, docs);
       setWorkspaceDocuments(docs);
     } catch (error) {
       console.error("Failed to fetch workspace documents:", error);
@@ -39,7 +43,21 @@ const WorkspaceView = () => {
   };
 
   const handleFilesSelected = (files: File[]) => {
-    setSelectedFiles(files);
+    setSelectedFiles((prevFiles) => {
+      // Create a new array with both previous and new files
+      const combinedFiles = [...prevFiles, ...files];
+      
+      // Remove any duplicates based on file name
+      const uniqueFiles = combinedFiles.filter((file, index, self) => 
+        index === self.findIndex((f) => f.name === file.name)
+      );
+      
+      return uniqueFiles;
+    });
+  };
+  
+  const handleRemoveSelectedFile = (indexToRemove: number) => {
+    setSelectedFiles(files => files.filter((_, index) => index !== indexToRemove));
   };
 
   const handleUploadSubmit = async () => {
@@ -104,6 +122,7 @@ const WorkspaceView = () => {
             <h2 className="text-xl font-medium text-[#2C2C2E] mb-4">Upload Documents</h2>
             <MultiFileUpload 
               onFilesSelected={handleFilesSelected}
+              onRemoveFile={handleRemoveSelectedFile}
               disabled={uploading}
               onUploadSubmit={handleUploadSubmit}
               selectedFiles={selectedFiles}
@@ -112,15 +131,18 @@ const WorkspaceView = () => {
           
           {/* Document List - This will show documents from the API */}
           {workspaceDocuments.length > 0 && (
-            <DocumentList 
-              documents={workspaceDocuments} 
-              onDelete={deleteDocument}
-            />
+            <div className="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+              <h2 className="text-xl font-medium text-[#2C2C2E] mb-4">Uploaded Documents</h2>
+              <DocumentList 
+                documents={workspaceDocuments} 
+                onDelete={deleteDocument}
+              />
+            </div>
           )}
           
           {/* Loading state */}
           {isLoadingDocs && (
-            <div className="flex justify-center py-8">
+            <div className="flex justify-center py-8 mt-6 bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0A66C2]"></div>
             </div>
           )}
