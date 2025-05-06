@@ -1,7 +1,6 @@
-
-import React, { useRef } from 'react';
-import { Upload, FileText, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useRef } from "react";
+import { Upload, FileText, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MultiFileUploadProps {
   onFilesSelected: (files: File[]) => void;
@@ -11,64 +10,59 @@ interface MultiFileUploadProps {
   selectedFiles: File[];
 }
 
-const MultiFileUpload = ({ 
-  onFilesSelected, 
+const MultiFileUpload = ({
+  onFilesSelected,
   onRemoveFile,
-  disabled = false, 
+  disabled = false,
   onUploadSubmit,
-  selectedFiles
+  selectedFiles,
 }: MultiFileUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    
     if (!files || files.length === 0) {
       return;
     }
-    
     const newFiles: File[] = [];
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
-      // Check if the file is a PDF
-      if (!file.type.includes('pdf')) {
+      if (!file.type.includes("pdf")) {
         continue;
       }
-      
       newFiles.push(file);
     }
-    
     if (newFiles.length > 0) {
       onFilesSelected(newFiles);
     }
-    
     // Clear the input to allow the same file to be uploaded again
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
-  
+
   return (
     <div className="w-full">
       {selectedFiles.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-lg font-medium text-[#2C2C2E] mb-3">Selected Documents</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 border p-3 rounded-md bg-gray-50">
             {selectedFiles.map((file, index) => (
-              <div 
+              <div
                 key={`${file.name}-${index}`}
                 className="flex items-center bg-white border border-gray-200 rounded-md p-2"
               >
                 <FileText className="h-4 w-4 text-[#0A66C2] mr-2 flex-shrink-0" />
-                <span className="text-sm text-[#2C2C2E] truncate flex-grow" title={file.name}>
+                <span
+                  className="text-sm text-[#2C2C2E] truncate flex-grow"
+                  title={file.name}
+                >
                   {file.name}
                 </span>
                 <button
@@ -81,12 +75,14 @@ const MultiFileUpload = ({
             ))}
           </div>
           <p className="text-sm text-gray-500 mb-3">
-            {selectedFiles.length} document{selectedFiles.length !== 1 ? 's' : ''} selected. 
-            Click "Submit {selectedFiles.length} Document{selectedFiles.length !== 1 ? 's' : ''}" to complete the upload.
+            {selectedFiles.length} document
+            {selectedFiles.length !== 1 ? "s" : ""} selected. Click "Submit{" "}
+            {selectedFiles.length} Document
+            {selectedFiles.length !== 1 ? "s" : ""}" to complete the upload.
           </p>
         </div>
       )}
-      
+
       <div className="flex items-center gap-3">
         <Button
           type="button"
@@ -97,7 +93,6 @@ const MultiFileUpload = ({
           <Upload className="h-4 w-4 mr-2" />
           Upload PDFs
         </Button>
-        
         {selectedFiles.length > 0 && onUploadSubmit && (
           <Button
             onClick={onUploadSubmit}
@@ -105,14 +100,14 @@ const MultiFileUpload = ({
             disabled={disabled}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Submit {selectedFiles.length} Document{selectedFiles.length !== 1 ? 's' : ''}
+            Submit {selectedFiles.length} Document
+            {selectedFiles.length !== 1 ? "s" : ""}
           </Button>
         )}
-        
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
           accept="application/pdf"
           onChange={handleFileChange}
           multiple
