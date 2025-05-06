@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Upload, X, File } from 'lucide-react';
+import { Upload, X, File, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MultiFileUploadProps {
@@ -61,28 +61,33 @@ const MultiFileUpload = ({
   
   return (
     <div className="w-full">
-      <div className="mb-4 flex flex-wrap gap-3">
-        {selectedFiles.map((file, index) => (
-          <div 
-            key={`${file.name}-${index}`}
-            className="flex items-center bg-gray-100 border border-gray-200 rounded-md p-2 pr-1"
-          >
-            <File className="h-4 w-4 text-[#0A66C2] mr-2" />
-            <span className="text-sm text-[#2C2C2E] truncate max-w-[150px]">
-              {file.name}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="ml-1 p-0 h-6 w-6 rounded-full hover:bg-gray-200"
-              onClick={() => handleRemoveFile(index)}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
+      {selectedFiles.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-600 mb-2">Selected Documents</h3>
+          <div className="flex flex-wrap gap-2">
+            {selectedFiles.map((file, index) => (
+              <div 
+                key={`${file.name}-${index}`}
+                className="flex items-center bg-gray-50 border border-gray-200 rounded-md p-1.5 pl-2"
+              >
+                <File className="h-3.5 w-3.5 text-[#0A66C2] mr-1.5" />
+                <span className="text-xs text-[#2C2C2E] truncate max-w-[150px]">
+                  {file.name}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="ml-1 p-0 h-5 w-5 rounded-full hover:bg-gray-200"
+                  onClick={() => handleRemoveFile(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
       
       <div className="flex items-center gap-3">
         <Button
@@ -92,7 +97,7 @@ const MultiFileUpload = ({
           className="bg-[#A259FF] hover:bg-[#A259FF]/90 text-white"
         >
           <Upload className="h-4 w-4 mr-2" />
-          Upload PDF{selectedFiles.length > 0 ? "s" : ""}
+          Upload PDF{selectedFiles.length !== 1 ? "s" : ""}
         </Button>
         
         {selectedFiles.length > 0 && onUploadSubmit && (
@@ -102,7 +107,7 @@ const MultiFileUpload = ({
             disabled={disabled}
           >
             <File className="h-4 w-4 mr-2" />
-            Upload {selectedFiles.length} Document{selectedFiles.length > 1 ? "s" : ""}
+            Upload {selectedFiles.length} Document{selectedFiles.length !== 1 ? "s" : ""}
           </Button>
         )}
         

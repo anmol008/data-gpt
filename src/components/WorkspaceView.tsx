@@ -9,7 +9,7 @@ import DocumentList from './DocumentList';
 import MultiFileUpload from './MultiFileUpload';
 
 const WorkspaceView = () => {
-  const { selectedWorkspace, uploadDocument, deleteDocument } = useWorkspace();
+  const { selectedWorkspace, uploadDocument, deleteDocument, refreshWorkspaces } = useWorkspace();
   const [query, setQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -36,6 +36,9 @@ const WorkspaceView = () => {
       
       toast.success(`${selectedFiles.length} document${selectedFiles.length > 1 ? 's' : ''} uploaded successfully!`);
       setSelectedFiles([]); // Clear selected files after successful upload
+      
+      // Refresh workspace data to show the newly uploaded documents
+      await refreshWorkspaces();
     } catch (error) {
       console.error("Failed to upload PDFs:", error);
       toast.error("Failed to upload documents");
@@ -66,7 +69,7 @@ const WorkspaceView = () => {
     <div className="flex flex-col h-full">
       {/* Workspace Header */}
       <header className="border-b border-gray-200 p-4 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold text-[#2C2C2E]">
             <span className="text-[#0A66C2]">DataGPT</span> / {selectedWorkspace.ws_name}
           </h1>
@@ -74,25 +77,19 @@ const WorkspaceView = () => {
       </header>
       
       {/* Workspace Content */}
-      <div className="flex flex-col flex-grow p-6 bg-gray-50 overflow-auto">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-            <h2 className="text-xl font-semibold text-[#2C2C2E] mb-4">Upload Documents</h2>
+      <div className="flex flex-col flex-grow p-4 md:p-6 bg-gray-50 overflow-auto">
+        <div className="max-w-5xl mx-auto w-full">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-lg font-medium text-[#2C2C2E] mb-4">Upload Documents</h2>
             <MultiFileUpload 
               onFilesSelected={handleFilesSelected}
               disabled={uploading}
               onUploadSubmit={handleUploadSubmit}
               selectedFiles={selectedFiles}
             />
-            
-            {selectedFiles.length > 0 && (
-              <div className="mt-4 text-sm text-gray-600">
-                {selectedFiles.length} document{selectedFiles.length > 1 ? "s" : ""} selected
-              </div>
-            )}
           </div>
           
-          {/* Document List */}
+          {/* Document List - This will show documents from the API */}
           {selectedWorkspace.documents && selectedWorkspace.documents.length > 0 && (
             <DocumentList 
               documents={selectedWorkspace.documents} 
@@ -101,11 +98,11 @@ const WorkspaceView = () => {
           )}
           
           {/* Empty state */}
-          {(!selectedWorkspace.documents || selectedWorkspace.documents.length === 0) && selectedFiles.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg shadow-sm border border-gray-100 text-center mt-6">
-              <File className="h-16 w-16 text-gray-300 mb-4" />
-              <h2 className="text-xl font-semibold text-[#2C2C2E] mb-2">No documents yet</h2>
-              <p className="text-gray-500 mb-6 max-w-md">
+          {(!selectedWorkspace.documents || selectedWorkspace.documents.length === 0) && !uploading && (
+            <div className="flex flex-col items-center justify-center py-8 bg-white rounded-lg shadow-sm border border-gray-100 text-center mt-6">
+              <File className="h-12 w-12 text-gray-300 mb-3" />
+              <h2 className="text-lg font-medium text-[#2C2C2E] mb-1">No documents yet</h2>
+              <p className="text-gray-500 max-w-md">
                 Upload PDF documents to start getting insights from your data.
               </p>
             </div>
@@ -115,7 +112,7 @@ const WorkspaceView = () => {
       
       {/* Query Input */}
       <div className="border-t border-gray-200 p-4 bg-white">
-        <div className="flex items-center gap-3 max-w-4xl mx-auto">
+        <div className="flex items-center gap-3 max-w-5xl mx-auto">
           <FileText className="h-5 w-5 text-[#0A66C2]" />
           <Input 
             type="text" 
