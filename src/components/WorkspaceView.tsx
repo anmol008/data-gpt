@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, FileText, Send, FilePdf } from 'lucide-react';
+import { Upload, FileText, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import DocumentList from './DocumentList';
 import MultiFileUpload from './MultiFileUpload';
@@ -129,7 +128,7 @@ const WorkspaceView = () => {
           {/* Empty state */}
           {!isLoadingDocs && workspaceDocuments.length === 0 && !uploading && (
             <div className="flex flex-col items-center justify-center py-8 bg-white rounded-lg shadow-sm border border-gray-100 text-center mt-6">
-              <FilePdf className="h-12 w-12 text-gray-300 mb-3" />
+              <FileText className="h-12 w-12 text-gray-300 mb-3" />
               <h2 className="text-lg font-medium text-[#2C2C2E] mb-1">No documents yet</h2>
               <p className="text-gray-500 max-w-md">
                 Upload PDF documents to start getting insights from your data.

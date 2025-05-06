@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Document } from '@/types/api';
-import { FilePdf, CheckCircle } from 'lucide-react';
+import { FileText, CheckCircle } from 'lucide-react';
 
 interface DocumentListProps {
   documents: Document[];
@@ -38,7 +38,7 @@ const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
           >
             <CheckCircle className="h-5 w-5 text-[#1ABC9C] mr-3 flex-shrink-0" />
             <div className="flex items-center flex-grow overflow-hidden">
-              <FilePdf className="h-5 w-5 text-[#0A66C2] mr-2 flex-shrink-0" />
+              <FileText className="h-5 w-5 text-[#0A66C2] mr-2 flex-shrink-0" />
               <span className="text-[#2C2C2E] truncate" title={doc.ws_doc_name}>
                 {doc.ws_doc_name}
               </span>

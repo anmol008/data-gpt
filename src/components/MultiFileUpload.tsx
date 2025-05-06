@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { Upload, FilePdf } from 'lucide-react';
+import { Upload, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MultiFileUploadProps {
@@ -65,7 +65,7 @@ const MultiFileUpload = ({
                 key={`${file.name}-${index}`}
                 className="flex items-center bg-gray-50 border border-gray-200 rounded-md p-2"
               >
-                <FilePdf className="h-4 w-4 text-[#0A66C2] mr-2" />
+                <FileText className="h-4 w-4 text-[#0A66C2] mr-2" />
                 <span className="text-sm text-[#2C2C2E] truncate max-w-[150px]">
                   {file.name}
                 </span>
@@ -96,7 +96,7 @@ const MultiFileUpload = ({
             className="bg-[#0A66C2] hover:bg-[#0A66C2]/90 text-white"
             disabled={disabled}
           >
-            <FilePdf className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 mr-2" />
             Upload {selectedFiles.length} Document{selectedFiles.length !== 1 ? 's' : ''}
           </Button>
         )}
