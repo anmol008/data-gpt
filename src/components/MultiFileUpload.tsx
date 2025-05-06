@@ -6,10 +6,16 @@ import { Button } from '@/components/ui/button';
 interface MultiFileUploadProps {
   onFilesSelected: (files: File[]) => void;
   disabled?: boolean;
+  onUploadSubmit?: () => void;
+  selectedFiles: File[];
 }
 
-const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadProps) => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+const MultiFileUpload = ({ 
+  onFilesSelected, 
+  disabled = false, 
+  onUploadSubmit,
+  selectedFiles
+}: MultiFileUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleUploadClick = () => {
@@ -39,9 +45,7 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
     }
     
     if (newFiles.length > 0) {
-      const updatedFiles = [...selectedFiles, ...newFiles];
-      setSelectedFiles(updatedFiles);
-      onFilesSelected(updatedFiles);
+      onFilesSelected(newFiles);
     }
     
     // Clear the input to allow the same file to be uploaded again
@@ -52,7 +56,6 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
   
   const handleRemoveFile = (index: number) => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
-    setSelectedFiles(updatedFiles);
     onFilesSelected(updatedFiles);
   };
   
@@ -81,7 +84,7 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
         ))}
       </div>
       
-      <div className="flex items-center">
+      <div className="flex items-center gap-3">
         <Button
           type="button"
           onClick={handleUploadClick}
@@ -91,6 +94,18 @@ const MultiFileUpload = ({ onFilesSelected, disabled = false }: MultiFileUploadP
           <Upload className="h-4 w-4 mr-2" />
           Upload PDF{selectedFiles.length > 0 ? "s" : ""}
         </Button>
+        
+        {selectedFiles.length > 0 && onUploadSubmit && (
+          <Button
+            onClick={onUploadSubmit}
+            className="bg-[#0A66C2] hover:bg-[#0A66C2]/90 text-white"
+            disabled={disabled}
+          >
+            <File className="h-4 w-4 mr-2" />
+            Upload {selectedFiles.length} Document{selectedFiles.length > 1 ? "s" : ""}
+          </Button>
+        )}
+        
         <input 
           type="file" 
           ref={fileInputRef} 
