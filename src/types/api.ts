@@ -28,3 +28,23 @@ export interface ApiResponse<T> {
   message: string;
   success: boolean;
 }
+
+// New chat-related types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+export interface Source {
+  source_id: string;
+  summary: string;
+  file: string;
+  page: number;
+}
+
+export interface ChatResponse {
+  answer: string;
+  sources: Source[];
+}

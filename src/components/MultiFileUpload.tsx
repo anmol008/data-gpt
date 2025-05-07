@@ -1,3 +1,4 @@
+
 import React, { useRef } from "react";
 import { Upload, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,9 +77,9 @@ const MultiFileUpload = ({
           </div>
           <p className="text-sm text-gray-500 mb-3">
             {selectedFiles.length} document
-            {selectedFiles.length !== 1 ? "s" : ""} selected. Click "Submit{" "}
+            {selectedFiles.length !== 1 ? "s" : ""} selected. Click "Process{" "}
             {selectedFiles.length} Document
-            {selectedFiles.length !== 1 ? "s" : ""}" to complete the upload.
+            {selectedFiles.length !== 1 ? "s" : ""}" to complete the upload and process for chatting.
           </p>
         </div>
       )}
@@ -100,7 +101,7 @@ const MultiFileUpload = ({
             disabled={disabled}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Submit {selectedFiles.length} Document
+            Process {selectedFiles.length} Document
             {selectedFiles.length !== 1 ? "s" : ""}
           </Button>
         )}

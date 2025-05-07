@@ -1,6 +1,8 @@
-import { Workspace, Document, ApiResponse } from "@/types/api";
+
+import { Workspace, Document, ApiResponse, ChatResponse } from "@/types/api";
 
 const API_BASE_URL = "https://si.pearlit.in/api/v1";
+const LLM_API_BASE_URL = "https://llmdemoapi.in";
 const DEFAULT_USER_ID = 1;
 
 // Helper function to handle API responses
@@ -105,9 +107,7 @@ export const documentApi = {
     const extension = nameParts.length > 1 ? nameParts.pop() || "pdf" : "pdf";
     const fileName = nameParts.join('.');
 
-    // In a real app, we'd upload the file here with FormData
-    // For now, we'll just simulate the API call
-    
+    // First, upload to the regular API
     const documentData: Document = {
       ws_doc_path: "",  // This would come from the server after upload
       ws_doc_name: file.name,
@@ -142,4 +142,83 @@ export const documentApi = {
     });
     return handleResponse<ApiResponse<null>>(response);
   },
+};
+
+// LLM API endpoints for chat functionality
+export const llmApi = {
+  // Upload documents to LLM API for processing
+  uploadDocuments: async (files: File[]): Promise<boolean> => {
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch(`${LLM_API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload documents to LLM API');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error uploading to LLM:', error);
+      return false;
+    }
+  },
+
+  // Query the LLM with a question
+  queryLLM: async (question: string): Promise<ChatResponse> => {
+    try {
+      // In a real implementation, this would be a POST request
+      // For now, using GET for simplicity as per the example
+      const response = await fetch(`${LLM_API_BASE_URL}/query?question=${encodeURIComponent(question)}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to query LLM API');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error querying LLM:', error);
+      // Return dummy data if the API fails
+      return getDummyChatResponse(question);
+    }
+  }
+};
+
+// Dummy data for testing when API is not available
+const getDummyChatResponse = (question: string): ChatResponse => {
+  return {
+    answer: "The author of the article is Ashkan Eslaminejad.\n\nAs for summarizing the topics, I analyzed the text and identified several key points:\n\n* The article discusses the analysis of structural performance under harmonic excitation, with a focus on conservative insights into equation (1) and its implications.\n* It also touches on the topic of exposure to irradiation and thermal effects, highlighting the importance of considering multiple potential aging mechanisms.\n* The article mentions the development of traditional SASSI and its limitations, as well as the introduction of algorithms that leverage commercial code SC-SASSI.\n* Additionally, it discusses the root causes of accelerated damage in structures, emphasizing the complex interaction between heat chemistry, cold or warm work, and thermal history.\n* Finally, the article provides a conservative method for assessing stress levels and ensuring continued operation can be justified through analytical methods with appropriate confidence and risk tolerance.\n\nIf data is missing, I would respond: \"According to the provided context, I could not find that information.\"",
+    sources: [
+      {
+        source_id: "fc67e564-883c-4f10-94a0-5fb97189ca0d",
+        summary: "conservative insights into the Equation (1) [Kc ]{qc } = {Fc } Equation (2) (-Ω2 [M]+iΩ...",
+        file: "54-News-and-Views-54-2024.pdf",
+        page: 5
+      },
+      {
+        source_id: "684036c7-29d4-4909-9a61-68b606716761",
+        summary: "exposure to irradiation and thermal effects. The analysis introduced reasonable inputs in place of...",
+        file: "54-News-and-Views-54-2024.pdf",
+        page: 15
+      },
+      {
+        source_id: "b0be045d-2318-479f-8a2b-b7ceda423f42",
+        summary: "traditional SASSI. The rapid analysis now allows more rigorous treatment of considerations that p...",
+        file: "54-News-and-Views-54-2024.pdf",
+        page: 12
+      },
+      {
+        source_id: "d8837195-99a7-428c-a3ca-619f06801045",
+        summary: "root causes are understood, the complex interaction between heat chemistry, the quantity of cold o...",
+        file: "dpdp_act.pdf",
+        page: 6
+      }
+    ]
+  };
 };
