@@ -1,31 +1,12 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import ChatView from "./ChatView";
-import { documentApi } from "@/services/api";
 
 const WorkspaceView = () => {
-  const { selectedWorkspace, refreshWorkspaces } = useWorkspace();
-
-  // Fetch workspace documents when workspace changes
-  useEffect(() => {
-    if (selectedWorkspace?.ws_id) {
-      fetchWorkspaceDocuments(selectedWorkspace.ws_id);
-    }
-  }, [selectedWorkspace?.ws_id]);
-
-  // Fetch documents for the current workspace
-  const fetchWorkspaceDocuments = async (wsId: number) => {
-    try {
-      await documentApi.getAll(wsId);
-      // Update workspace document list in context
-      refreshWorkspaces();
-    } catch (error) {
-      console.error("Failed to fetch workspace documents:", error);
-    }
-  };
+  const { selectedWorkspace } = useWorkspace();
 
   if (!selectedWorkspace) {
     return (

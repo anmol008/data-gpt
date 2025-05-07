@@ -1,4 +1,3 @@
-
 const API_BASE_URL = "https://si.pearlit.in/api/v1";
 const LLM_API_BASE_URL = "https://llmdemoapi.in";
 
@@ -30,102 +29,28 @@ const mockChatResponse: ChatResponse = {
   ]
 };
 
-// Document API service
+// Document API
 export const documentApi = {
   getAll: async (wsId: number): Promise<Document[]> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ws-docs?ws_id=${wsId}`);
-      const data = await response.json();
-      
-      if (data.success && Array.isArray(data.data)) {
-        return data.data;
-      }
-      return [];
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      return [];
-    }
+    // Mock implementation - replace with actual API call
+    console.log(`Fetching documents for workspace ${wsId}`);
+    return Promise.resolve([]);
   },
-  create: async (
-    ws_doc_path: string,
-    ws_doc_name: string,
-    ws_doc_extn: string,
-    ws_doc_for: string,
-    ws_id: number,
-    user_id: number
-  ): Promise<Document | null> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ws-docs`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ws_doc_path,
-          ws_doc_name,
-          ws_doc_extn,
-          ws_doc_for,
-          ws_id,
-          user_id,
-          is_active: true,
-        }),
-      });
-      const data = await response.json();
-      if (data.success && data.data) {
-        return data.data;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error creating document:", error);
-      return null;
-    }
+  
+  upload: async (file: File, wsId: number): Promise<boolean> => {
+    // Mock implementation - replace with actual API call
+    console.log(`Uploading file ${file.name} to workspace ${wsId}`);
+    
+    // Simulate delay for API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return Promise.resolve(true);
   },
-  update: async (document: Document): Promise<Document | null> => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/ws-docs/${document.ws_doc_id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(document),
-        }
-      );
-      const data = await response.json();
-      if (data.success && data.data) {
-        return data.data;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error updating document:", error);
-      return null;
-    }
-  },
-  delete: async (ws_doc_id: number): Promise<{success: boolean}> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ws-docs/${ws_doc_id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json();
-      return { success: data.success === true };
-    } catch (error) {
-      console.error("Error deleting document:", error);
-      return { success: false };
-    }
-  },
-  // Adding upload method for file uploads
-  upload: async (file: File, workspace: WorkspaceWithDocuments): Promise<{success: boolean}> => {
-    try {
-      // In a real implementation, you would upload the file to your server
-      console.log(`Uploading file ${file.name} to workspace ${workspace.ws_name}`);
-      
-      // For now, simulate a successful upload
-      return { success: true };
-    } catch (error) {
-      console.error("Error uploading document:", error);
-      return { success: false };
-    }
+  
+  delete: async (docId: number): Promise<boolean> => {
+    // Mock implementation - replace with actual API call
+    console.log(`Deleting document ${docId}`);
+    return Promise.resolve(true);
   }
 };
 
@@ -256,49 +181,35 @@ export const userApi = {
   },
 };
 
-// LLM API service
+// LLM API
 export const llmApi = {
-  uploadDocuments: async (files: File[]): Promise<boolean> => {
-    try {
-      console.log("Uploading files to LLM API:", files.map(f => f.name).join(", "));
-      
-      // In a real implementation, upload the files to the LLM API
-      // const formData = new FormData();
-      // files.forEach(file => formData.append('files', file));
-      // const response = await fetch(`${LLM_API_BASE_URL}/upload`, {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // const data = await response.json();
-      // return data.success;
-      
-      return true;
-    } catch (error) {
-      console.error("Error uploading documents to LLM API:", error);
-      return false;
-    }
-  },
-
   queryLLM: async (query: string): Promise<ChatResponse> => {
-    try {
-      console.log("Querying LLM API:", query);
-      
-      // In a real implementation, query the LLM API
-      // const response = await fetch(`${LLM_API_BASE_URL}/query`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({ query })
-      // });
-      // const data = await response.json();
-      // return data;
-      
-      // Return mock data for now
-      return mockChatResponse;
-    } catch (error) {
-      console.error("Error querying LLM API:", error);
-      throw error;
-    }
+    // Mock implementation - replace with actual API call
+    console.log(`Querying LLM with: ${query}`);
+    
+    // Simulate delay for API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return {
+      answer: `This is a mock response to your query: "${query}". In a real application, this would come from the LLM API.`,
+      sources: [
+        {
+          source_id: "mock-1",
+          summary: "Mock source summary",
+          file: "sample.pdf",
+          page: 1
+        }
+      ]
+    };
+  },
+  
+  uploadDocuments: async (files: File[]): Promise<boolean> => {
+    // Mock implementation - replace with actual API call
+    console.log(`Uploading ${files.length} files to LLM`);
+    
+    // Simulate delay for API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return Promise.resolve(true);
   }
 };
