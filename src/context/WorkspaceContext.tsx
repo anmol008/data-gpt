@@ -1,8 +1,9 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
-import { Workspace, Document, WorkspaceWithDocuments } from "@/types/api";
+import { Workspace, Document, WorkspaceWithDocuments, ChatMessage, ChatData, LLMResponse } from "@/types/api";
 import { workspaceApi, documentApi } from "@/services/api";
+import { llmApi } from "@/services/llmApi";
+import { v4 as uuidv4 } from "uuid";
 
 interface WorkspaceContextType {
   workspaces: WorkspaceWithDocuments[];
@@ -13,9 +14,11 @@ interface WorkspaceContextType {
   updateWorkspace: (workspace: Workspace) => Promise<void>;
   deleteWorkspace: (wsId: number) => Promise<void>;
   selectWorkspace: (workspace: WorkspaceWithDocuments) => void;
-  uploadDocument: (file: File) => Promise<void>;
+  uploadDocument: (file: File) => Promise<boolean>;
   deleteDocument: (docId: number) => Promise<void>;
   refreshWorkspaces: () => Promise<void>;
+  sendMessage: (workspaceId: number, message: string) => Promise<void>;
+  chatMessages: ChatData;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -25,6 +28,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceWithDocuments | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatData>({});
 
   // Load workspaces on mount
   useEffect(() => {
@@ -38,39 +42,43 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       
       // Get all workspaces
-      const workspaceData = await workspaceApi.getAll();
+      const response = await workspaceApi.getAll();
       
-      // Transform into WorkspaceWithDocuments with mock data for now
-      // In a real app, you would fetch actual document counts
-      const transformedWorkspaces: WorkspaceWithDocuments[] = workspaceData.map(ws => ({
-        ...ws,
-        documents: [],
-        // Mock data - in real app, these would come from the API
-        messageCount: Math.floor(Math.random() * 50) + 5,
-        fileCount: Math.floor(Math.random() * 15) + 1
-      }));
-      
-      // For each workspace, get its documents
-      for (const workspace of transformedWorkspaces) {
-        try {
-          if (workspace.ws_id) {
-            const docs = await documentApi.getAll(workspace.ws_id);
-            workspace.documents = docs;
-            workspace.fileCount = docs.length; // Update with real count
+      if (response && Array.isArray(response.data)) {
+        // Transform into WorkspaceWithDocuments
+        const transformedWorkspaces: WorkspaceWithDocuments[] = response.data.map(ws => ({
+          ...ws,
+          documents: [],
+          // Mock data - in real app, these would come from the API
+          messageCount: Math.floor(Math.random() * 50) + 5,
+          fileCount: Math.floor(Math.random() * 15) + 1
+        }));
+        
+        // For each workspace, get its documents
+        for (const workspace of transformedWorkspaces) {
+          try {
+            if (workspace.ws_id) {
+              const docs = await documentApi.getAll(workspace.ws_id);
+              workspace.documents = docs;
+              workspace.fileCount = docs.length; // Update with real count
+            }
+          } catch (docErr) {
+            console.error(`Failed to load documents for workspace ${workspace.ws_id}:`, docErr);
           }
-        } catch (docErr) {
-          console.error(`Failed to load documents for workspace ${workspace.ws_id}:`, docErr);
         }
-      }
-      
-      setWorkspaces(transformedWorkspaces);
-      
-      // If we have a selected workspace, update it
-      if (selectedWorkspace && selectedWorkspace.ws_id) {
-        const updatedSelected = transformedWorkspaces.find(w => w.ws_id === selectedWorkspace.ws_id);
-        if (updatedSelected) {
-          setSelectedWorkspace(updatedSelected);
+        
+        setWorkspaces(transformedWorkspaces);
+        
+        // If we have a selected workspace, update it
+        if (selectedWorkspace && selectedWorkspace.ws_id) {
+          const updatedSelected = transformedWorkspaces.find(w => w.ws_id === selectedWorkspace.ws_id);
+          if (updatedSelected) {
+            setSelectedWorkspace(updatedSelected);
+          }
         }
+      } else {
+        console.error("Invalid response format from API:", response);
+        throw new Error("Invalid response from API");
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load workspaces';
@@ -182,11 +190,11 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     setSelectedWorkspace(workspace);
   };
 
-  const uploadDocument = async (file: File) => {
+  const uploadDocument = async (file: File): Promise<boolean> => {
     try {
       if (!selectedWorkspace) {
         toast.error("Please select a workspace first");
-        return;
+        return false;
       }
       
       setLoading(true);
@@ -194,21 +202,34 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       // Check if the file is a PDF
       if (!file.type.includes('pdf')) {
         toast.error("Only PDF files are supported");
-        return;
+        return false;
+      }
+
+      // First try to upload to LLM API
+      if (selectedWorkspace.ws_id) {
+        try {
+          await llmApi.uploadDocument(file, selectedWorkspace.ws_id);
+        } catch (llmErr) {
+          console.error("Failed to upload to LLM API, continuing with regular upload:", llmErr);
+        }
       }
       
+      // Then upload to regular API
       const response = await documentApi.upload(file, selectedWorkspace);
       
       if (response.success) {
         toast.success("Document uploaded successfully");
         await refreshWorkspaces();
+        return true;
       } else {
         toast.error("Failed to upload document");
+        return false;
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload document';
       setError(errorMessage);
       toast.error(errorMessage);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -235,6 +256,71 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Add new method for sending messages
+  const sendMessage = async (workspaceId: number, message: string): Promise<void> => {
+    try {
+      setLoading(true);
+      
+      // Add user message to state immediately
+      const userMessage: ChatMessage = {
+        id: uuidv4(),
+        content: message,
+        type: 'user',
+        timestamp: Date.now()
+      };
+
+      setChatMessages(prev => {
+        const workspaceMessages = prev[workspaceId] || [];
+        return {
+          ...prev,
+          [workspaceId]: [...workspaceMessages, userMessage]
+        };
+      });
+
+      // Send message to LLM API
+      const response = await llmApi.query(message);
+
+      // Add bot response
+      const botMessage: ChatMessage = {
+        id: uuidv4(),
+        content: response.answer,
+        type: 'bot',
+        timestamp: Date.now(),
+        sources: response.sources
+      };
+
+      setChatMessages(prev => {
+        const workspaceMessages = prev[workspaceId] || [];
+        return {
+          ...prev,
+          [workspaceId]: [...workspaceMessages, botMessage]
+        };
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
+      setError(errorMessage);
+      toast.error(errorMessage);
+
+      // Add error message as bot response
+      const errorBotMessage: ChatMessage = {
+        id: uuidv4(),
+        content: "Sorry, I couldn't process your request. Please try again later.",
+        type: 'bot',
+        timestamp: Date.now()
+      };
+
+      setChatMessages(prev => {
+        const workspaceMessages = prev[workspaceId] || [];
+        return {
+          ...prev,
+          [workspaceId]: [...workspaceMessages, errorBotMessage]
+        };
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const contextValue: WorkspaceContextType = {
     workspaces,
     selectedWorkspace,
@@ -246,7 +332,9 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     selectWorkspace,
     uploadDocument,
     deleteDocument,
-    refreshWorkspaces
+    refreshWorkspaces,
+    sendMessage,
+    chatMessages
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { Workspace, Document, ApiResponse } from "@/types/api";
 
 const API_BASE_URL = "https://si.pearlit.in/api/v1";
@@ -14,15 +15,14 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 
 // Workspace API endpoints
 export const workspaceApi = {
-  getAll: async (): Promise<Workspace[]> => {
+  getAll: async (): Promise<ApiResponse<Workspace[]>> => {
     const response = await fetch(`${API_BASE_URL}/workspaces`);
-    const result = await handleResponse<{ data: Workspace[] }>(response);
-    return result.data;
+    return handleResponse<ApiResponse<Workspace[]>>(response);
   },  
 
-  getById: async (wsId: number): Promise<Workspace> => {
+  getById: async (wsId: number): Promise<ApiResponse<Workspace>> => {
     const response = await fetch(`${API_BASE_URL}/workspaces?ws_id=${wsId}`);
-    return handleResponse<Workspace>(response);
+    return handleResponse<ApiResponse<Workspace>>(response);
   },
 
   create: async (workspace: Workspace): Promise<ApiResponse<Workspace>> => {

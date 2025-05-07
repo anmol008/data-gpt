@@ -28,3 +28,27 @@ export interface ApiResponse<T> {
   message: string;
   success: boolean;
 }
+
+export interface LLMSource {
+  source_id: string;
+  summary: string;
+  file: string;
+  page: number;
+}
+
+export interface LLMResponse {
+  answer: string;
+  sources: LLMSource[];
+}
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  type: 'user' | 'bot';
+  timestamp: number;
+  sources?: LLMSource[];
+}
+
+export interface ChatData {
+  [workspaceId: number]: ChatMessage[];
+}
