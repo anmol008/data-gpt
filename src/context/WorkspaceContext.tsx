@@ -42,7 +42,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       
       // Transform into WorkspaceWithDocuments with mock data for now
       // In a real app, you would fetch actual document counts
-      const transformedWorkspaces: WorkspaceWithDocuments[] = workspaceData.map(ws => ({
+      const transformedWorkspaces: WorkspaceWithDocuments[] = workspaceData.map((ws: any) => ({
         ...ws,
         documents: [],
         // Mock data - in real app, these would come from the API
