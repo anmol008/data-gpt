@@ -1,215 +1,145 @@
+import { Workspace, Document, ApiResponse } from "@/types/api";
+
 const API_BASE_URL = "https://si.pearlit.in/api/v1";
-const LLM_API_BASE_URL = "https://llmdemoapi.in";
+const DEFAULT_USER_ID = 1;
 
-// Import types
-import { Document, ChatResponse, WorkspaceWithDocuments } from "@/types/api";
-
-// Mock data for when the API is not available
-const mockChatResponse: ChatResponse = {
-  answer: "The author of the article is Ashkan Eslaminejad.\n\nAs for summarizing the topics, I analyzed the text and identified several key points:\n\n* The article discusses the analysis of structural performance under harmonic excitation, with a focus on conservative insights into equation (1) and its implications.\n* It also touches on the topic of exposure to irradiation and thermal effects, highlighting the importance of considering multiple potential aging mechanisms.\n* The article mentions the development of traditional SASSI and its limitations, as well as the introduction of algorithms that leverage commercial code SC-SASSI.\n* Additionally, it discusses the root causes of accelerated damage in structures, emphasizing the complex interaction between heat chemistry, cold or warm work, and thermal history.\n* Finally, the article provides a conservative method for assessing stress levels and ensuring continued operation can be justified through analytical methods with appropriate confidence and risk tolerance.\n\nIf data is missing, I would respond: \"According to the provided context, I could not find that information.\"",
-  sources: [
-    {
-      source_id: "fc67e564-883c-4f10-94a0-5fb97189ca0d",
-      summary: "conservative insights into the  Equation (1) \t [Kc ]{qc } = {Fc }\t\t \t \t \t Equation (2) \t (-Ω2 [M]+iΩ...",
-      file: "54-News-and-Views-54-2024.pdf",
-      page: 5
-    },
-    {
-      source_id: "684036c7-29d4-4909-9a61-68b606716761",
-      summary: "exposure to irradiation and thermal effects.  The analysis introduced  reasonable inputs in place of...",
-      file: "54-News-and-Views-54-2024.pdf",
-      page: 15
-    },
-    {
-      source_id: "b0be045d-2318-479f-8a2b-b7ceda423f42",
-      summary: "traditional SASSI.  The rapid analysis  now allows more rigorous treatment  of considerations that p...",
-      file: "54-News-and-Views-54-2024.pdf",
-      page: 12
-    }
-  ]
-};
-
-// Document API
-export const documentApi = {
-  getAll: async (wsId: number): Promise<Document[]> => {
-    // Mock implementation - replace with actual API call
-    console.log(`Fetching documents for workspace ${wsId}`);
-    return Promise.resolve([]);
-  },
-  
-  upload: async (file: File, wsId: number): Promise<boolean> => {
-    // Mock implementation - replace with actual API call
-    console.log(`Uploading file ${file.name} to workspace ${wsId}`);
-    
-    // Simulate delay for API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return Promise.resolve(true);
-  },
-  
-  delete: async (docId: number): Promise<boolean> => {
-    // Mock implementation - replace with actual API call
-    console.log(`Deleting document ${docId}`);
-    return Promise.resolve(true);
+// Helper function to handle API responses
+const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "An error occurred");
   }
+  return response.json();
 };
 
-// Workspace API service
+// Workspace API endpoints
 export const workspaceApi = {
-  getAll: async (): Promise<any> => {
-    try {
-      const user_id = 1; // Default user ID
-      const response = await fetch(`${API_BASE_URL}/workspaces?user_id=${user_id}`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching workspaces:", error);
-      return [];
-    }
+  getAll: async (): Promise<Workspace[]> => {
+    const response = await fetch(`${API_BASE_URL}/workspaces`);
+    const result = await handleResponse<{ data: Workspace[] }>(response);
+    return result.data;
+  },  
+
+  getById: async (wsId: number): Promise<Workspace> => {
+    const response = await fetch(`${API_BASE_URL}/workspaces?ws_id=${wsId}`);
+    return handleResponse<Workspace>(response);
   },
-  create: async (workspace: { ws_name: string; user_id: number; is_active: boolean }): Promise<{success: boolean, data?: any}> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/workspaces`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(workspace),
-      });
-      const data = await response.json();
-      return { success: true, data };
-    } catch (error) {
-      console.error("Error creating workspace:", error);
-      return { success: false };
-    }
+
+  create: async (workspace: Workspace): Promise<ApiResponse<Workspace>> => {
+    const response = await fetch(`${API_BASE_URL}/workspaces`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...workspace,
+        user_id: workspace.user_id || DEFAULT_USER_ID,
+        is_active: true,
+      }),
+    });
+    return handleResponse<ApiResponse<Workspace>>(response);
   },
-  update: async (workspace: any): Promise<{success: boolean, data?: any}> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/workspaces/${workspace.ws_id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(workspace),
-      });
-      const data = await response.json();
-      return { success: true, data };
-    } catch (error) {
-      console.error("Error updating workspace:", error);
-      return { success: false };
-    }
+
+  update: async (workspace: Workspace): Promise<ApiResponse<Workspace>> => {
+    const response = await fetch(`${API_BASE_URL}/workspaces`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(workspace),
+    });
+    return handleResponse<ApiResponse<Workspace>>(response);
   },
-  delete: async (ws_id: number): Promise<{success: boolean}> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/workspaces/${ws_id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json();
-      return { success: data.success === true };
-    } catch (error) {
-      console.error("Error deleting workspace:", error);
-      return { success: false };
-    }
+
+  delete: async (wsId: number): Promise<ApiResponse<null>> => {
+    const response = await fetch(`${API_BASE_URL}/workspaces`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ws_id: wsId,
+        is_active: false,
+      }),
+    });
+    return handleResponse<ApiResponse<null>>(response);
   },
 };
 
-// User API service
-export const userApi = {
-  getAll: async (): Promise<any> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching users:", error);
+// Document API endpoints
+export const documentApi = {
+  getAll: async (wsId?: number, userId?: number): Promise<Document[]> => {
+    let url = `${API_BASE_URL}/ws-docs`;
+    const params = [];
+    
+    if (wsId) params.push(`ws_id=${wsId}`);
+    if (userId) params.push(`user_id=${userId}`);
+    
+    if (params.length > 0) {
+      url += `?${params.join("&")}`;
+    }
+    
+    console.log(`Fetching documents with URL: ${url}`);
+    const response = await fetch(url);
+    const result = await handleResponse<{success: boolean, data: Document[]}>(response);
+    
+    // Check if the API response has the expected structure
+    if (result.success && Array.isArray(result.data)) {
+      console.log(`Fetched ${result.data.length} documents for workspace ${wsId}`);
+      return result.data;
+    } else {
+      console.log("API response structure doesn't match expected format:", result);
+      // If we didn't get the expected structure, return an empty array
       return [];
     }
   },
-  get: async (user_id: number): Promise<any> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/${user_id}`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      return null;
-    }
-  },
-  create: async (user_name: string, user_email: string): Promise<any> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_name, user_email, is_active: true }),
-      });
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error creating user:", error);
-      return null;
-    }
-  },
-  update: async (user: any): Promise<any> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/${user.user_id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error updating user:", error);
-      return null;
-    }
-  },
-  delete: async (user_id: number): Promise<boolean> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/${user_id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json();
-      return data.success === true;
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      return false;
-    }
-  },
-};
 
-// LLM API
-export const llmApi = {
-  queryLLM: async (query: string): Promise<ChatResponse> => {
-    // Mock implementation - replace with actual API call
-    console.log(`Querying LLM with: ${query}`);
+  getById: async (docId: number): Promise<Document> => {
+    const response = await fetch(`${API_BASE_URL}/ws-docs?ws_doc_id=${docId}`);
+    return handleResponse<Document>(response);
+  },
+
+  upload: async (file: File, workspace: Workspace): Promise<ApiResponse<Document>> => {
+    // Extract file extension
+    const nameParts = file.name.split('.');
+    const extension = nameParts.length > 1 ? nameParts.pop() || "pdf" : "pdf";
+    const fileName = nameParts.join('.');
+
+    // In a real app, we'd upload the file here with FormData
+    // For now, we'll just simulate the API call
     
-    // Simulate delay for API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    return {
-      answer: `This is a mock response to your query: "${query}". In a real application, this would come from the LLM API.`,
-      sources: [
-        {
-          source_id: "mock-1",
-          summary: "Mock source summary",
-          file: "sample.pdf",
-          page: 1
-        }
-      ]
+    const documentData: Document = {
+      ws_doc_path: "",  // This would come from the server after upload
+      ws_doc_name: file.name,
+      ws_doc_extn: extension,
+      ws_doc_for: "",
+      ws_id: workspace.ws_id || 0,
+      user_id: workspace.user_id || DEFAULT_USER_ID,
+      is_active: true,
     };
+    
+    const response = await fetch(`${API_BASE_URL}/ws-docs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(documentData),
+    });
+    
+    return handleResponse<ApiResponse<Document>>(response);
   },
-  
-  uploadDocuments: async (files: File[]): Promise<boolean> => {
-    // Mock implementation - replace with actual API call
-    console.log(`Uploading ${files.length} files to LLM`);
-    
-    // Simulate delay for API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return Promise.resolve(true);
-  }
+
+  delete: async (docId: number): Promise<ApiResponse<null>> => {
+    const response = await fetch(`${API_BASE_URL}/ws-docs`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ws_doc_id: docId,
+        is_active: false,
+      }),
+    });
+    return handleResponse<ApiResponse<null>>(response);
+  },
 };

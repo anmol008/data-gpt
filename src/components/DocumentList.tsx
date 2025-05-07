@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Document } from "@/types/api";
 import { FileText, CheckCircle, Trash2 } from "lucide-react";
@@ -37,7 +36,7 @@ const DocumentList = ({ documents = [], onDelete }: DocumentListProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[300px] overflow-y-auto pr-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[100px] overflow-y-auto pr-1">
         {documents.map((doc) => (
           <div
             key={doc.ws_doc_id}

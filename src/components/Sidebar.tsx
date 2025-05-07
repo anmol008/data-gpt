@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { WorkspaceWithDocuments } from "@/types/api";
@@ -20,19 +19,15 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Upload,
 } from "lucide-react";
 import WorkspaceDialog from "./WorkspaceDialog";
 import logo from "./../../public/icons/logo-light.png";
-import UploadDocumentsModal from "./UploadDocumentsModal";
 
 const Sidebar = () => {
   const { workspaces, selectedWorkspace, selectWorkspace, deleteWorkspace } = useWorkspace();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [editWorkspace, setEditWorkspace] = useState<WorkspaceWithDocuments | null>(null);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadWorkspace, setUploadWorkspace] = useState<WorkspaceWithDocuments | null>(null);
 
   const filteredWorkspaces = searchQuery
     ? workspaces.filter((ws) =>
@@ -54,12 +49,6 @@ const Sidebar = () => {
     if (workspace.ws_id) {
       await deleteWorkspace(workspace.ws_id);
     }
-  };
-
-  const handleUploadClick = (workspace: WorkspaceWithDocuments, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setUploadWorkspace(workspace);
-    setIsUploadModalOpen(true);
   };
 
   return (
@@ -136,10 +125,6 @@ const Sidebar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={(e) => handleUploadClick(workspace, e)}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    <span>Upload Files</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={(e) => handleEditClick(workspace, e)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
@@ -185,18 +170,6 @@ const Sidebar = () => {
         }}
         workspace={editWorkspace}
       />
-
-      {/* Upload Documents Modal */}
-      {uploadWorkspace && (
-        <UploadDocumentsModal
-          isOpen={isUploadModalOpen}
-          onClose={() => {
-            setIsUploadModalOpen(false);
-            setUploadWorkspace(null);
-          }}
-          workspace={uploadWorkspace}
-        />
-      )}
     </div>
   );
 };

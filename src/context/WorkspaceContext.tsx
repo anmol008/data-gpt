@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 import { Workspace, Document, WorkspaceWithDocuments } from "@/types/api";
@@ -37,13 +38,11 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       
       // Get all workspaces
-      const response = await workspaceApi.getAll();
-      
-      // Make sure workspaceData is an array
-      const workspaceData = Array.isArray(response) ? response : (response.data || []);
+      const workspaceData = await workspaceApi.getAll();
       
       // Transform into WorkspaceWithDocuments with mock data for now
-      const transformedWorkspaces: WorkspaceWithDocuments[] = workspaceData.map((ws: Workspace) => ({
+      // In a real app, you would fetch actual document counts
+      const transformedWorkspaces: WorkspaceWithDocuments[] = workspaceData.map(ws => ({
         ...ws,
         documents: [],
         // Mock data - in real app, these would come from the API
@@ -56,9 +55,8 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
         try {
           if (workspace.ws_id) {
             const docs = await documentApi.getAll(workspace.ws_id);
-            // Ensure docs is an array
-            workspace.documents = Array.isArray(docs) ? docs : (docs.data || []);
-            workspace.fileCount = workspace.documents.length; // Update with real count
+            workspace.documents = docs;
+            workspace.fileCount = docs.length; // Update with real count
           }
         } catch (docErr) {
           console.error(`Failed to load documents for workspace ${workspace.ws_id}:`, docErr);
@@ -186,7 +184,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
 
   const uploadDocument = async (file: File) => {
     try {
-      if (!selectedWorkspace || !selectedWorkspace.ws_id) {
+      if (!selectedWorkspace) {
         toast.error("Please select a workspace first");
         return;
       }
@@ -199,22 +197,18 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       
-      // Note: Adjust the API call according to your actual API
-      const response = await documentApi.upload(file, selectedWorkspace.ws_id);
+      const response = await documentApi.upload(file, selectedWorkspace);
       
-      if (response) {
+      if (response.success) {
         toast.success("Document uploaded successfully");
         await refreshWorkspaces();
-        return true;
       } else {
         toast.error("Failed to upload document");
-        return false;
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload document';
       setError(errorMessage);
       toast.error(errorMessage);
-      return false;
     } finally {
       setLoading(false);
     }

@@ -15,14 +15,6 @@ export interface Document {
   ws_id: number;
   user_id: number;
   is_active: boolean;
-  workspaces?: {
-    ws_id: number;
-    ws_name: string;
-  };
-  users?: {
-    user_id: number;
-    user_name: string;
-  };
 }
 
 export interface WorkspaceWithDocuments extends Workspace {
@@ -35,24 +27,4 @@ export interface ApiResponse<T> {
   data: T;
   message: string;
   success: boolean;
-}
-
-// Chat-related types
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-export interface Source {
-  source_id: string;
-  summary: string;
-  file: string;
-  page: number;
-}
-
-export interface ChatResponse {
-  answer: string;
-  sources: Source[];
 }
