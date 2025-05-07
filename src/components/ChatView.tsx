@@ -1,24 +1,29 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChatMessage, Source } from "@/types/api";
+import { ChatMessage, Source, WorkspaceWithDocuments } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, FileText, Copy, Repeat, ChevronDown, ChevronUp } from "lucide-react";
+import { Send, FileText, Copy, Paperclip, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { llmApi } from "@/services/api";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
+import { useWorkspace } from "@/context/WorkspaceContext";
+import UploadDocumentsModal from "./UploadDocumentsModal";
 
 interface ChatViewProps {
   workspaceId?: number;
   workspaceName?: string;
+  workspace?: WorkspaceWithDocuments;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ workspaceId, workspaceName }) => {
+const ChatView: React.FC<ChatViewProps> = ({ workspaceId, workspaceName, workspace }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSources, setShowSources] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const { selectedWorkspace } = useWorkspace();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -178,6 +183,15 @@ const ChatView: React.FC<ChatViewProps> = ({ workspaceId, workspaceName }) => {
       {/* Input area */}
       <div className="border-t border-gray-200 p-4 bg-white">
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
+          <Button
+            onClick={() => setIsUploadModalOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="text-gray-500 hover:bg-gray-100"
+            title="Upload documents"
+          >
+            <Paperclip className="h-5 w-5" />
+          </Button>
           <div className="w-full relative">
             <Input
               value={input}
@@ -198,6 +212,15 @@ const ChatView: React.FC<ChatViewProps> = ({ workspaceId, workspaceName }) => {
           </Button>
         </div>
       </div>
+
+      {/* Upload Documents Modal */}
+      {selectedWorkspace && (
+        <UploadDocumentsModal
+          isOpen={isUploadModalOpen}
+          onClose={() => setIsUploadModalOpen(false)}
+          workspace={selectedWorkspace}
+        />
+      )}
     </div>
   );
 };

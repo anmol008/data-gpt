@@ -1,4 +1,3 @@
-
 export interface Workspace {
   ws_id?: number;
   ws_name: string;
@@ -15,6 +14,14 @@ export interface Document {
   ws_id: number;
   user_id: number;
   is_active: boolean;
+  workspaces?: {
+    ws_id: number;
+    ws_name: string;
+  };
+  users?: {
+    user_id: number;
+    user_name: string;
+  };
 }
 
 export interface WorkspaceWithDocuments extends Workspace {
@@ -29,7 +36,7 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
-// New chat-related types
+// Chat-related types
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
