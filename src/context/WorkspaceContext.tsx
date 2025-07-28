@@ -69,7 +69,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
         
         setWorkspaces(transformedWorkspaces);
         
-        // If we have a selected workspace, update it
+        // If we have a selected workspace, update it with fresh data but preserve the selection
         if (selectedWorkspace && selectedWorkspace.ws_id) {
           const updatedSelected = transformedWorkspaces.find(w => w.ws_id === selectedWorkspace.ws_id);
           if (updatedSelected) {
@@ -219,6 +219,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       
       if (response.success) {
         toast.success("Document uploaded successfully");
+        // Refresh workspaces to get updated document list
         await refreshWorkspaces();
         return true;
       } else {
@@ -243,6 +244,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
       
       if (response.success) {
         toast.success("Document deleted successfully");
+        // Refresh workspaces to get updated document list
         await refreshWorkspaces();
       } else {
         toast.error("Failed to delete document");
@@ -256,10 +258,10 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Add new method for sending messages
+  // Modified sendMessage to not affect document visibility
   const sendMessage = async (workspaceId: number, message: string): Promise<void> => {
     try {
-      setLoading(true);
+      // Don't set loading to true here to avoid affecting document display
       
       // Add user message to state immediately
       const userMessage: ChatMessage = {
@@ -316,8 +318,6 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
           [workspaceId]: [...workspaceMessages, errorBotMessage]
         };
       });
-    } finally {
-      setLoading(false);
     }
   };
 
