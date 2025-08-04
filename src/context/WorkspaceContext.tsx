@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Workspace, Document, WorkspaceWithDocuments, ChatMessage, ChatData, LLMResponse } from "@/types/api";
 import { workspaceApi, documentApi } from "@/services/api";
 import { llmApi } from "@/services/llmApi";
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 import { v4 as uuidv4 } from "uuid";
 
 interface WorkspaceContextType {
@@ -29,6 +30,7 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatData>({});
+  const { isFeatureAccessible } = useSubscriptionGuard();
 
   // Load workspaces on mount
   useEffect(() => {
@@ -90,6 +92,9 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const createWorkspace = async (name: string) => {
+    if (!isFeatureAccessible()) {
+      return;
+    }
     try {
       setLoading(true);
       
@@ -191,6 +196,9 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const uploadDocument = async (file: File): Promise<boolean> => {
+    if (!isFeatureAccessible()) {
+      return false;
+    }
     try {
       if (!selectedWorkspace) {
         toast.error("Please select a workspace first");
@@ -258,8 +266,11 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Modified sendMessage to not affect document visibility
+  // Modified sendMessage to not affect document visibility and add subscription guard
   const sendMessage = async (workspaceId: number, message: string): Promise<void> => {
+    if (!isFeatureAccessible()) {
+      return;
+    }
     try {
       // Don't set loading to true here to avoid affecting document display
       
