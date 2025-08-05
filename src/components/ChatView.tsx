@@ -393,7 +393,7 @@ const ChatView = ({
         </div>
         <div ref={messagesEndRef} />
       </div>
-      <div className="bg-sidebar mb-2 p-2 w-[80%] mx-auto flex flex-col gap-2 rounded-xl border">
+      <div className="bg-card mb-2 p-2 w-[80%] mx-auto flex flex-col gap-2 rounded-xl border shadow-sm">
         <div className="relative">
           <textarea
             ref={inputRef}
@@ -403,7 +403,7 @@ const ChatView = ({
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}
             data-tour="ask-question"
-            className="w-full resize-none bg-transparent text-sidebar-foreground border-none focus:outline-none focus:ring-0 rounded-xl px-3 py-2 min-h-[44px] text-base placeholder:text-muted-foreground overflow-y-auto"
+            className="w-full resize-none bg-transparent text-foreground border-none focus:outline-none focus:ring-0 rounded-xl px-3 py-2 min-h-[44px] text-base placeholder:text-muted-foreground overflow-y-auto"
             style={{ maxHeight: isMobile ? '120px' : '192px' }}
             aria-label="Chat message input"
           />
@@ -425,7 +425,7 @@ const ChatView = ({
               variant="ghost"
               size="icon"
               onClick={handleUploadClick}
-              className="hover:bg-muted text-sidebar-foreground min-h-[44px] min-w-[44px] transition-colors"
+              className="hover:bg-muted text-foreground min-h-[44px] min-w-[44px] transition-colors"
               aria-label="Upload PDF files"
             >
               <Upload className="w-4 h-4" />
@@ -434,7 +434,7 @@ const ChatView = ({
               variant="ghost"
               size="icon"
               onClick={handleUrlClick}
-              className="hover:bg-muted text-sidebar-foreground min-h-[44px] min-w-[44px] transition-colors"
+              className="hover:bg-muted text-foreground min-h-[44px] min-w-[44px] transition-colors"
               aria-label="Add URL"
             >
               <Link className="w-4 h-4" />
