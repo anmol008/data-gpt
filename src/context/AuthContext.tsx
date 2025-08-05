@@ -1,179 +1,187 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, AuthContextType } from '@/types/auth';
-import { authApi } from '@/services/authApi';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  SigninRequest,
+  SignupRequest,
+} from "@/types/auth";
+import { toast } from "sonner";
+import { authApi } from "@/services/authApi";
 
-interface AuthState {
+interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  isAppValid: boolean;
+  loading: boolean;
+  userRole: number;
   expiryDate: string | null;
-  isLoading: boolean;
-  token: string | null;
+  isAppValid: boolean;
+  signin: (credentials: SigninRequest) => Promise<boolean>;
+  signup: (userData: SignupRequest) => Promise<boolean>;
+  logout: () => void;
+  updateUserData: (updatedUser: User) => void;
+  checkFeatureAccess: () => boolean;
 }
-
-type AuthAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SIGN_IN_SUCCESS'; payload: { user: User; token: string; isAppValid: boolean; expiryDate: string } }
-  | { type: 'SIGN_OUT' }
-  | { type: 'UPDATE_SUBSCRIPTION'; payload: { isAppValid: boolean; expiryDate: string } };
-
-const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  isAppValid: false,
-  expiryDate: null,
-  isLoading: true,
-  token: null,
-};
-
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SIGN_IN_SUCCESS':
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        isAppValid: action.payload.isAppValid,
-        expiryDate: action.payload.expiryDate,
-        isLoading: false,
-      };
-    case 'SIGN_OUT':
-      return {
-        ...initialState,
-        isLoading: false,
-      };
-    case 'UPDATE_SUBSCRIPTION':
-      return {
-        ...state,
-        isAppValid: action.payload.isAppValid,
-        expiryDate: action.payload.expiryDate,
-      };
-    default:
-      return state;
-  }
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<number>(2); // GUEST by default
+  const [expiryDate, setExpiryDate] = useState<string | null>(null);
+  const [isAppValid, setIsAppValid] = useState<boolean>(false); // false by default
+  const [subscriptionHash, setSubscriptionHash] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
-
-  const isSubscriptionExpired = (expiryDate: string | null): boolean => {
-    if (!expiryDate) return true;
-    return new Date(expiryDate) <= new Date();
-  };
-
-  const signIn = async (email: string, password: string): Promise<boolean> => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    
-    try {
-      const response = await authApi.signin(email, password);
-      
-      if (response.success && response.user && response.token) {
-        // Validate subscription status - check both flag and expiry date
-        const isValidSubscription = response.is_app_valid && !isSubscriptionExpired(response.expiry_date);
-        
-        dispatch({
-          type: 'SIGN_IN_SUCCESS',
-          payload: {
-            user: response.user,
-            token: response.token,
-            isAppValid: isValidSubscription,
-            expiryDate: response.expiry_date,
-          },
-        });
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      dispatch({ type: 'SET_LOADING', payload: false });
-      return false;
-    }
-  };
-
-  const signOut = () => {
-    dispatch({ type: 'SIGN_OUT' });
-  };
-
-  const checkSubscription = async (): Promise<void> => {
-    if (!state.token) return;
-    
-    try {
-      const subscriptionData = await authApi.checkSubscription(state.token);
-      const isValidSubscription = subscriptionData.is_app_valid && !isSubscriptionExpired(subscriptionData.expiry_date);
-      
-      dispatch({
-        type: 'UPDATE_SUBSCRIPTION',
-        payload: {
-          isAppValid: isValidSubscription,
-          expiryDate: subscriptionData.expiry_date,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to check subscription:', error);
-      // On error, assume subscription is invalid for security
-      dispatch({
-        type: 'UPDATE_SUBSCRIPTION',
-        payload: {
-          isAppValid: false,
-          expiryDate: null,
-        },
-      });
-    }
-  };
-
-  // Initialize auth state and check subscription periodically
   useEffect(() => {
-    // Auto sign-in for development (remove in production)
-    const initAuth = async () => {
-      // This is a mock auto-signin for development
-      // Remove this in production and implement proper session management
-      const success = await signIn("test@example.com", "password");
-      if (!success) {
-        dispatch({ type: 'SET_LOADING', payload: false });
+    // Load user and role for UI continuity only
+    const storedUser = localStorage.getItem("user");
+    const storedRole = localStorage.getItem("userRole");
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+        if (storedRole) setUserRole(parseInt(storedRole, 10));
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+        localStorage.removeItem("user");
+        localStorage.removeItem("userRole");
       }
-    };
-    
-    initAuth();
+    }
+
+    setLoading(false);
   }, []);
 
-  // Periodically check subscription status (every 5 minutes)
-  useEffect(() => {
-    if (state.isAuthenticated && state.token) {
-      const interval = setInterval(() => {
-        checkSubscription();
-      }, 5 * 60 * 1000); // 5 minutes
+  const signin = async (credentials: SigninRequest): Promise<boolean> => {
+    try {
+      const response = await authApi.signin(credentials);
 
-      return () => clearInterval(interval);
+      if (response.success && response.data?.length > 0) {
+        const userData = response.data[0];
+
+        // Assign role
+        let roleId = 2;
+        if (userData.pi_roles?.length > 0) {
+          roleId = userData.pi_roles[0].role_id;
+        }
+
+        setUser(userData);
+        setUserRole(roleId);
+        setExpiryDate(response.expiry_date || null);
+        setIsAppValid(response.is_app_valid || false);
+
+        // Secure hash
+        const subscriptionData = `${userData.user_id}_${response.is_app_valid}_${response.expiry_date}`;
+        const hash = btoa(subscriptionData);
+        setSubscriptionHash(hash);
+
+        // UI only: persist user & role (not access control)
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("userRole", roleId.toString());
+
+        toast.success("Signed in successfully");
+
+        // Redirect based on user role
+        if (roleId === 1) {
+          // Super Admin redirects to dashboard
+          navigate("/dashboard");
+        } else if (roleId === 2) {
+          // Other users (like Guests) redirect to workspace
+          navigate("/workspace");
+        }
+        return true;
+      } else {
+        toast.error(response.msg || "Failed to sign in");
+        return false;
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Failed to sign in. Please check your credentials.");
+      return false;
     }
-  }, [state.isAuthenticated, state.token]);
-
-  const value: AuthContextType = {
-    user: state.user,
-    isAuthenticated: state.isAuthenticated,
-    isAppValid: state.isAppValid,
-    expiryDate: state.expiryDate,
-    isLoading: state.isLoading,
-    signIn,
-    signOut,
-    checkSubscription,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const signup = async (userData: SignupRequest): Promise<boolean> => {
+    try {
+      const response = await authApi.signup(userData);
+
+      if (response.success) {
+        toast.success("Account created successfully. Please sign in.");
+        navigate("/signin");
+        return true;
+      } else {
+        toast.error(response.msg || "Failed to create account");
+        return false;
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error("Failed to create account. Please try again.");
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setUserRole(2);
+    setExpiryDate(null);
+    setIsAppValid(false);
+    setSubscriptionHash(null);
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("userRole");
+    toast.success("Logged out successfully");
+    navigate("/signin");
+  };
+
+  const checkFeatureAccess = (): boolean => {
+    if (!user || !subscriptionHash) return false;
+    const expectedData = `${user.user_id}_${isAppValid}_${expiryDate}`;
+    const expectedHash = btoa(expectedData);
+
+    if (subscriptionHash !== expectedHash) {
+      console.warn("Hash validation failed. Possible tampering.");
+      return false;
+    }
+
+    return isAppValid;
+  };
+
+  const updateUserData = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser)); // For UI continuity
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        loading,
+        userRole,
+        expiryDate,
+        isAppValid,
+        signin,
+        signup,
+        logout,
+        updateUserData,
+        checkFeatureAccess,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

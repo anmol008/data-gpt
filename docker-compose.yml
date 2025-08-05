@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  edelweiss-datagpt-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: edelweiss-datagpt-ui:latest
+    container_name: edelweiss-datagpt-ui
+    ports:
+      - "9595:9595"
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  backend:
+    image: edelweiss-datagpt-ui:latest
+    container_name: edelweiss-datagpt-ui
+    ports:
+      - "9595:9595"
+    restart: unless-stopped

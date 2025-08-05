@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { WorkspaceWithDocuments } from '@/types/api';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 interface WorkspaceDialogProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface WorkspaceDialogProps {
 }
 
 const WorkspaceDialog = ({ isOpen, onClose, workspace }: WorkspaceDialogProps) => {
+  const { user, checkFeatureAccess } = useAuth();
   const { createWorkspace, updateWorkspace } = useWorkspace();
   const [workspaceName, setWorkspaceName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +37,12 @@ const WorkspaceDialog = ({ isOpen, onClose, workspace }: WorkspaceDialogProps) =
     if (!workspaceName.trim()) {
       return;
     }
+
+    // Check subscription validity for creating new workspaces
+    if (!isEditing && !checkFeatureAccess()) {
+      toast.error("Your subscription has expired. Please renew to create new workspaces.");
+      return;
+    }
     
     setIsSubmitting(true);
     
@@ -44,7 +53,7 @@ const WorkspaceDialog = ({ isOpen, onClose, workspace }: WorkspaceDialogProps) =
           ws_name: workspaceName,
         });
       } else {
-        await createWorkspace(workspaceName);
+        await createWorkspace(workspaceName, user?.user_id);
       }
       onClose();
     } catch (error) {

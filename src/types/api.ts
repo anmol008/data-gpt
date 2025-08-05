@@ -1,9 +1,10 @@
-
 export interface Workspace {
   ws_id?: number;
   ws_name: string;
   user_id: number;
   is_active: boolean;
+  session_id?: string;
+  ws_date?: string;
 }
 
 export interface Document {
@@ -38,6 +39,7 @@ export interface LLMSource {
 
 export interface LLMResponse {
   answer: string;
+  response_time_seconds?: number;
   sources: LLMSource[];
 }
 
@@ -51,4 +53,49 @@ export interface ChatMessage {
 
 export interface ChatData {
   [workspaceId: number]: ChatMessage[];
+}
+
+export interface ChatPrompt {
+  prompt_id?: number;
+  prompt_text: string;
+  response_text: string;
+  model_name: string;
+  temperature: number;
+  token_usage: number;
+  ws_id: number;
+  user_id: number;
+  session_id: string;
+  resp_time?: string;
+  sources?: string[];
+  is_active: boolean;
+  workspaces?: {
+    ws_name: string;
+  };
+  users?: {
+    user_name: string;
+  };
+}
+
+export interface SigninRequest {
+  user_email: string;
+  user_pwd: string;
+}
+
+export interface SignupRequest {
+  user_name: string;
+  user_email: string;
+  user_pwd: string;
+  user_mobile: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
+  is_active: boolean;
+}
+
+// Add new type for session types
+export type SessionType = 'pdf' | 'url' | 'empty';
+
+// Add interface for session info
+export interface SessionInfo {
+  id: string;
+  type: SessionType;
+  documents: string[];
 }

@@ -1,66 +1,77 @@
-import { AuthResponse } from "@/types/auth";
 
-const API_BASE_URL = "https://si.pearlit.in/api/v1";
+import { API_BASE_URL } from "@/constants/api";
+import { SigninRequest, SignupRequest, AuthResponse, User, UserForManagement, ChatHistoryItem } from "@/types/auth";
+
+const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "An error occurred");
+  }
+  return response.json();
+};
 
 export const authApi = {
-  signin: async (email: string, password: string): Promise<AuthResponse> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Authentication failed");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Sign in error:", error);
-      
-      // Mock response for development/testing
-      // In production, this should only return actual API responses
-      return {
-        success: true,
-        message: "Mock authentication successful",
-        user: {
-          id: 1,
-          email,
-          name: "Test User"
-        },
-        token: "mock-jwt-token",
-        is_app_valid: true,
-        expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      };
-    }
+  signin: async (credentials: SigninRequest): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/signin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    });
+    return handleResponse<AuthResponse>(response);
   },
 
-  checkSubscription: async (token: string): Promise<{ is_app_valid: boolean; expiry_date: string }> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/subscription`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+  signup: async (userData: SignupRequest): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+    return handleResponse<AuthResponse>(response);
+  },
 
-      if (!response.ok) {
-        throw new Error("Failed to check subscription");
-      }
+  getUsers: async (roleId: number): Promise<{ data: UserForManagement[] }> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/user?role_id=${roleId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse<{ data: UserForManagement[] }>(response);
+  },
 
-      return await response.json();
-    } catch (error) {
-      console.error("Subscription check error:", error);
-      
-      // Mock response for development/testing
-      return {
-        is_app_valid: true,
-        expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-    }
+  updateUser: async (userData: UserForManagement | User): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/user`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+    return handleResponse<AuthResponse>(response);
+  },
+
+  forgotPassword: async (email: string): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/signin-forgotpwd`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_email: email }),
+    });
+    return handleResponse<AuthResponse>(response);
+  },
+
+  getUserChatHistory: async (userId: number): Promise<{ data: ChatHistoryItem[] }> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/prompts?user_id=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse<{ data: ChatHistoryItem[] }>(response);
   },
 };

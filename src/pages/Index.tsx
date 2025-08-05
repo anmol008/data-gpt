@@ -1,40 +1,33 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import SignIn from '@/components/SignIn';
-import { Loader2 } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isAppValid, isLoading } = useAuth();
+  const { isAuthenticated, loading, userRole } = useAuth();
   
   useEffect(() => {
-    // Only redirect if user is authenticated and has valid subscription
-    if (isAuthenticated && isAppValid) {
-      navigate('/dashboard');
+    if (!loading) {
+      // Redirect based on authentication state and user role
+      if (isAuthenticated) {
+        if (userRole === 1) {
+          // Super Admin redirects to dashboard
+          navigate('/dashboard');
+        } else {
+          // Other users (like Guests) redirect to workspace
+          navigate('/workspace');
+        }
+      } else {
+        // Not authenticated users redirect to signin
+        navigate('/signin');
+      }
     }
-  }, [navigate, isAuthenticated, isAppValid]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <h1 className="text-4xl font-bold mb-4">Loading DataGPT...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !isAppValid) {
-    return <SignIn />;
-  }
+  }, [navigate, isAuthenticated, loading, userRole]);
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Redirecting to Dashboard...</h1>
+        <h1 className="text-4xl font-bold mb-4">Loading Edelweiss DataGpt...</h1>
       </div>
     </div>
   );
