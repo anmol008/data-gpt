@@ -183,13 +183,13 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 border-r border-gray-700 w-72 overflow-hidden">
+    <div className="h-screen flex flex-col bg-sidebar border-r border-sidebar-border w-72 overflow-hidden">
       <div className="flex justify-center">
         <img src={logoWhite} alt="Logo" className="w-64 h-[85px] mx-auto p-1" />
       </div>
 
       {/* SidebarNav always rendered, regardless of role */}
-      <div className="border-b border-gray-900 pb-2">
+      <div className="border-b border-sidebar-border pb-2">
         <SidebarNav />
       </div>
 
@@ -199,7 +199,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
           <div className="px-3 py-3">
             <Button
               onClick={handleCreateWorkspaceClick}
-              className="w-full bg-[#A259FF] hover:bg-[#A259FF]/90 text-white rounded-md h-9 shadow-sm flex items-center justify-center"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-md h-9 shadow-sm flex items-center justify-center"
               data-tour="create-workspace"
             >
               <Plus className="h-4 w-4 mr-2" /> New Workspace
@@ -208,18 +208,18 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
 
           <div className="px-3 mb-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search workspaces..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-gray-700 border-gray-600 text-gray-200 focus-visible:ring-[#A259FF] h-9 text-sm"
+                className="pl-9 bg-input border-border text-foreground focus-visible:ring-ring h-9 text-sm"
               />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-3 py-2 min-h-0">
-            <div className="flex items-center text-sm font-medium text-gray-400 mb-2">
+            <div className="flex items-center text-sm font-medium text-muted-foreground mb-2">
               <Folder className="h-4 w-4 mr-2" /> WORKSPACES
             </div>
 
@@ -246,7 +246,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                 .map(([date, workspaceList]) => (
                   <div key={date} className="space-y-1 mb-2">
                     <div className="text-sm font-medium pl-1 py-1">
-                      <span className="bg-gradient-to-br from-purple-500 to-indigo-600 bg-clip-text text-transparent shadow-[0_2px_0_rgba(168,85,247,0.3)] inline-block">
+                      <span className="text-primary font-semibold">
                         {new Date(date).toLocaleDateString("en-GB")}
                       </span>
                     </div>
@@ -268,19 +268,19 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                             key={wsId}
                             onClick={() => handleWorkspaceClick(workspace)}
                             className={`flex items-center justify-between p-1 rounded-md cursor-pointer group transition-colors duration-200 ${isSelected
-                              ? "bg-gray-700 border-l-4 border-[#A259FF]"
-                              : "hover:bg-gray-700 border-l-4 border-transparent"
+                              ? "bg-sidebar-accent border-l-4 border-primary"
+                              : "hover:bg-sidebar-accent border-l-4 border-transparent"
                               }`}
                           >
                             {/* Left Side: Workspace info */}
                             <div className="flex items-start space-x-2">
                               <FileText
-                                className={`h-4 w-4 mt-0.5 ${isSelected ? "text-[#A259FF]" : "text-gray-400"
+                                className={`h-4 w-4 mt-0.5 ${isSelected ? "text-primary" : "text-muted-foreground"
                                   }`}
                               />
                               <div>
-                                <p className="flex text-sm font-medium text-gray-200">
-                                  <p className="text-sm font-medium text-gray-200">
+                                <p className="flex text-sm font-medium text-sidebar-foreground">
+                                  <p className="text-sm font-medium text-sidebar-foreground">
                                     {workspace.ws_name.length > 20
                                       ? `${workspace.ws_name.slice(0, 25)}...`
                                       : workspace.ws_name}
@@ -289,7 +289,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                 <div className="flex items-center space-x-2 mt-0.5">
                                   {/* Buttons*/}
                                   <div className="flex items-center space-x-2 mt-0.5">
-                                    <p className="text-xs text-gray-400">
+                                    <p className="text-xs text-muted-foreground">
                                       {workspace.fileCount} {workspace.fileCount === 1 ? 'file' : 'files'}
                                     </p>
                                     <Tooltip.Provider delayDuration={0}>
@@ -299,7 +299,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className={`h-4 w-6 p-0 ${isSelected ? "text-gray-400 hover:text-white hover:bg-gray-600" : "text-gray-600 cursor-not-allowed"}`}
+                              className={`h-4 w-6 p-0 ${isSelected ? "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent" : "text-muted-foreground cursor-not-allowed"}`}
                                               onClick={(e) => {
                                                 if (isSelected) handleHistoryClick(workspace, e);
                                                 e.stopPropagation();
@@ -324,7 +324,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className={`h-4 w-6 p-0 ${isSelected ? "text-gray-400 hover:text-white hover:bg-gray-600" : "text-gray-600 cursor-not-allowed"}`}
+                              className={`h-4 w-6 p-0 ${isSelected ? "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent" : "text-muted-foreground cursor-not-allowed"}`}
                                               onClick={(e) => {
                                                 if (isSelected) handleUrlClick(e);
                                                 e.stopPropagation();
@@ -349,7 +349,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className={`h-4 w-6 p-0 ${isSelected ? "text-gray-400 hover:text-white hover:bg-gray-600" : "text-gray-600 cursor-not-allowed"}`}
+                                              className={`h-4 w-6 p-0 ${isSelected ? "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent" : "text-muted-foreground cursor-not-allowed"}`}
                                               onClick={(e) => {
                                                 if (isSelected) handleUploadClick(e);
                                                 e.stopPropagation();
@@ -376,7 +376,7 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className="h-4 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-600"
+                                          className="h-4 w-6 p-0 text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
                                           data-tour="edit-workspace"
                                         >
                                           <MoreVertical className="h-4 w-4" />
@@ -384,18 +384,18 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent
                                         align="end"
-                                        className="w-40 bg-gray-800 text-gray-200 border-gray-700"
+                                        className="w-40"
                                       >
                                         <DropdownMenuItem
                                           onClick={(e) => handleEditClick(workspace, e)}
-                                          className="focus:bg-gray-700 focus:text-white"
+                                          className="focus:bg-accent focus:text-accent-foreground"
                                         >
                                           <Edit className="mr-2 h-4 w-4" />
                                           <span>Edit</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator className="bg-gray-700" />
+                                        <DropdownMenuSeparator />
                                         <DropdownMenuItem
-                                          className="text-red-400 focus:text-red-300 focus:bg-gray-700"
+                                          className="text-destructive focus:text-destructive focus:bg-accent"
                                           onClick={(e) => handleDeleteClick(workspace, e)}
                                         >
                                           <Trash2 className="mr-2 h-4 w-4" />
@@ -416,10 +416,10 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
           </div>
 
           {/* Footer Stats */}
-          <div className="mt-auto border-t border-gray-700 p-3 bg-gray-800">
-            <div className="flex items-center justify-between text-sm text-gray-300 py-1.5">
+          <div className="mt-auto border-t border-sidebar-border p-3 bg-sidebar">
+            <div className="flex items-center justify-between text-sm text-muted-foreground py-1.5">
               <div className="flex items-center">
-                <FileText className="h-4 w-4 mr-2 text-[#A259FF]" />
+                <FileText className="h-4 w-4 mr-2 text-primary" />
                 <span>Documents</span>
               </div>
               <span className="font-semibold">
@@ -431,11 +431,11 @@ const Sidebar = ({ onWorkspaceSelect }: SidebarProps) => {
             </div>
             
             {/* Take a Tour Button */}
-            <div className="mt-3 pt-3 border-t border-gray-700">
+            <div className="mt-3 pt-3 border-t border-sidebar-border">
               <Button
                 onClick={handleStartTour}
                 variant="outline"
-                className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white h-8 text-sm"
+                className="w-full h-8 text-sm"
               >
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Take a Tour

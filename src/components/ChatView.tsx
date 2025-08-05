@@ -224,7 +224,7 @@ const ChatView = ({
       <div className="mt-2">
         <button
           onClick={() => toggleSources(messageId)}
-          className="text-sm text-gray-500 hover:text-gray-300 flex items-center min-h-[44px] px-2 py-1 rounded"
+          className="text-sm text-muted-foreground hover:text-foreground flex items-center min-h-[44px] px-2 py-1 rounded"
           aria-label={isExpanded ? "Hide Citations" : "Show Citations"}
         >
           <span>{isExpanded ? "Hide Citations" : "Show Citations"}</span>
@@ -242,7 +242,7 @@ const ChatView = ({
           </svg>
         </button>
         {isExpanded && (
-          <div className="mt-2 space-y-1 p-3 border border-gray-600 rounded-md bg-gray-800/50">
+          <div className="mt-2 space-y-1 p-3 border rounded-md bg-muted/50">
             {sources.map((src) => (
               <div key={src.source_id} className="mb-2 last:mb-0">
                 <div className="flex items-center text-blue-400">
@@ -255,7 +255,7 @@ const ChatView = ({
                     {src.file} {src.page && `(page ${src.page})`}
                   </span>
                 </div>
-                <p className="text-sm text-gray-300 mt-1 pl-5 break-words">{src.summary}</p>
+                <p className="text-sm text-muted-foreground mt-1 pl-5 break-words">{src.summary}</p>
               </div>
             ))}
           </div>
@@ -272,7 +272,7 @@ const ChatView = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-800 relative">
+    <div className="flex flex-col h-full bg-background relative">
       {/* Chat messages with proper mobile spacing - scrollable area */}
       <div className="flex-grow overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <div className={`max-w-none ${isMobile ? '' : 'max-w-6xl mx-auto'} w-full`}>
@@ -284,9 +284,9 @@ const ChatView = ({
               >
                 <div
                   className={`relative ${msg.type === "user"
-                      ? "inline-block max-w-[80%] bg-gradient-to-br from-purple-500 to-indigo-600 hover:bg-[#A259FF]/90 text-white ml-4 sm:ml-12"
-                      : "w-full sm:max-w-4xl bg-gray-800 text-white mr-4 sm:mr-12"
-                    } px-4 sm:px-5 py-3 sm:py-4 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-[0_-3px_6px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.1),-3px_0_6px_rgba(0,0,0,0.1),3px_0_6px_rgba(0,0,0,0.1)]`}
+                      ? "inline-block max-w-[80%] bg-primary hover:bg-primary/90 text-primary-foreground ml-4 sm:ml-12"
+                      : "w-full sm:max-w-4xl bg-card text-card-foreground mr-4 sm:mr-12 border"
+                    } px-4 sm:px-5 py-3 sm:py-4 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm`}
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -318,12 +318,12 @@ const ChatView = ({
                         />
                       ),
                       tbody: ({ node, ...props }) => <tbody {...props} />,
-                      tr: ({ node, ...props }) => (
-                        <tr className="bg-gray-800 hover:bg-gray-700 border-b border-gray-700" {...props} />
-                      ),
+                       tr: ({ node, ...props }) => (
+                         <tr className="bg-muted hover:bg-muted/80 border-b" {...props} />
+                       ),
                       td: ({ node, ...props }) => (
                         <td
-                          className="px-2 md:px-4 py-1 md:py-2 align-top border-b border-gray-700 text-xs md:text-sm"
+                          className="px-2 md:px-4 py-1 md:py-2 align-top border-b text-xs md:text-sm"
                           {...props}
                         />
                       ),
@@ -336,12 +336,12 @@ const ChatView = ({
                       li: ({ node, ...props }) => (
                         <li className="mb-1 leading-relaxed" {...props} />
                       ),
-                      p: ({ node, ...props }) => (
-                        <p className="mb-2 leading-relaxed text-gray-300" {...props} />
-                      ),
-                      blockquote: ({ node, ...props }) => (
-                        <blockquote className="border-l-4 border-blue-600 pl-4 italic text-gray-400 my-4" {...props} />
-                      )
+                       p: ({ node, ...props }) => (
+                         <p className="mb-2 leading-relaxed" {...props} />
+                       ),
+                       blockquote: ({ node, ...props }) => (
+                         <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4" {...props} />
+                       )
                     }
                     }
                   >
@@ -359,7 +359,7 @@ const ChatView = ({
                           navigator.clipboard.writeText(msg.content);
                           toast.success("Response copied");
                         }}
-                        className="absolute top-2 right-2 text-gray-400 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center rounded"
+                        className="absolute top-2 right-2 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center rounded"
                         title="Copy response"
                         aria-label="Copy response"
                       >
@@ -372,8 +372,8 @@ const ChatView = ({
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 px-4">
-              <FileText className="h-12 sm:h-16 w-12 sm:w-16 mb-4 text-gray-500" />
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground px-4">
+              <FileText className="h-12 sm:h-16 w-12 sm:w-16 mb-4 text-muted-foreground" />
               <h2 className="text-xl sm:text-2xl font-semibold text-center">Start a conversation</h2>
               <p className="text-sm sm:text-base text-center mt-2 max-w-md">
                 Upload a PDF or add a URL to begin chatting with your documents
@@ -383,17 +383,17 @@ const ChatView = ({
 
           {isWorkspaceLoading && (
             <div className="flex justify-start mb-4 sm:mb-6">
-              <div className="bg-gray-800 text-white px-4 sm:px-5 py-3 rounded-xl animate-pulse flex gap-2 mr-4 sm:mr-12">
-                <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="bg-card text-card-foreground px-4 sm:px-5 py-3 rounded-xl animate-pulse flex gap-2 mr-4 sm:mr-12 border">
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           )}
         </div>
         <div ref={messagesEndRef} />
       </div>
-      <div className="bg-gray-600 mb-2 p-2 w-[80%] mx-auto flex flex-col gap-2 rounded-xl">
+      <div className="bg-sidebar mb-2 p-2 w-[80%] mx-auto flex flex-col gap-2 rounded-xl border">
         <div className="relative">
           <textarea
             ref={inputRef}
@@ -403,7 +403,7 @@ const ChatView = ({
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}
             data-tour="ask-question"
-            className="w-full resize-none bg-transparent text-gray-100 border-none focus:outline-none focus:ring-0 rounded-xl px-3 py-2 min-h-[44px] text-base placeholder:text-gray-400 overflow-y-auto scroll-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
+            className="w-full resize-none bg-transparent text-sidebar-foreground border-none focus:outline-none focus:ring-0 rounded-xl px-3 py-2 min-h-[44px] text-base placeholder:text-muted-foreground overflow-y-auto"
             style={{ maxHeight: isMobile ? '120px' : '192px' }}
             aria-label="Chat message input"
           />
@@ -415,7 +415,7 @@ const ChatView = ({
             <Button
               size="sm"
               onClick={() => setIsModalOpen(true)}
-              className="px-3 py-2 text-xs sm:text-sm bg-gray-800 text-white hover:bg-gray-700 rounded-md min-h-[44px] transition-colors"
+              className="px-3 py-2 text-xs sm:text-sm bg-card text-card-foreground hover:bg-muted rounded-md min-h-[44px] transition-colors border"
               aria-label="View session information"
               data-tour="session-info"
             >
@@ -425,7 +425,7 @@ const ChatView = ({
               variant="ghost"
               size="icon"
               onClick={handleUploadClick}
-              className="hover:bg-gray-700 text-gray-300 min-h-[44px] min-w-[44px] transition-colors"
+              className="hover:bg-muted text-sidebar-foreground min-h-[44px] min-w-[44px] transition-colors"
               aria-label="Upload PDF files"
             >
               <Upload className="w-4 h-4" />
@@ -434,7 +434,7 @@ const ChatView = ({
               variant="ghost"
               size="icon"
               onClick={handleUrlClick}
-              className="hover:bg-gray-700 text-gray-300 min-h-[44px] min-w-[44px] transition-colors"
+              className="hover:bg-muted text-sidebar-foreground min-h-[44px] min-w-[44px] transition-colors"
               aria-label="Add URL"
             >
               <Link className="w-4 h-4" />
@@ -445,7 +445,7 @@ const ChatView = ({
             variant="default"
             onClick={handleSendMessage}
             disabled={isWorkspaceLoading}
-            className="bg-[#A259FF] hover:bg-[#A259FF]/90 text-white rounded-md min-h-[44px] min-w-[44px] shadow-sm flex items-center justify-center transition-all duration-200 disabled:opacity-50"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md min-h-[44px] min-w-[44px] shadow-sm flex items-center justify-center transition-all duration-200 disabled:opacity-50"
             aria-label="Send message"
           >
             <Send className="w-4 h-4" />
@@ -455,7 +455,7 @@ const ChatView = ({
 
       {/* Session Modal with mobile responsiveness */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className={`${isMobile ? 'mx-4 max-w-[calc(100vw-2rem)]' : 'sm:max-w-md'} bg-gray-900 text-white`}>
+        <DialogContent className={`${isMobile ? 'mx-4 max-w-[calc(100vw-2rem)]' : 'sm:max-w-md'}`}>
           <DialogHeader>
             <DialogTitle>Current Session</DialogTitle>
           </DialogHeader>

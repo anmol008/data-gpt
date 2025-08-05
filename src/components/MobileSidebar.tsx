@@ -25,7 +25,7 @@ const MobileSidebar = ({ children, isOpen, onOpenChange }: MobileSidebarProps) =
         <Button
           variant="ghost"
           size="icon"
-          className="fixed top-4 left-4 z-50 h-11 w-11 bg-gray-800/90 hover:bg-gray-700/90 text-white backdrop-blur-sm border border-gray-600"
+          className="fixed top-4 left-4 z-50 h-11 w-11 bg-background/90 hover:bg-muted/90 text-foreground backdrop-blur-sm border border-border"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -33,7 +33,7 @@ const MobileSidebar = ({ children, isOpen, onOpenChange }: MobileSidebarProps) =
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 w-72 bg-gray-900 border-gray-700"
+        className="p-0 w-72 bg-sidebar border-sidebar-border"
         aria-describedby="mobile-sidebar-description"
       >
         <div className="h-full overflow-hidden">

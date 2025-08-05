@@ -14,15 +14,13 @@ import WorkspaceContent from "./pages/WorkspaceContent";
 import UserManagementContent from "./pages/UserManagementContent";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthLayout } from "./components/AuthLayout";
-import { ThemeProvider } from "./context/ThemeContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <ThemeProvider defaultTheme="dark">
-        <div className="min-h-screen w-full">
+      <div className="min-h-screen w-full">
           <BrowserRouter>
             <AuthProvider>
               <Toaster />
@@ -50,8 +48,7 @@ const App = () => (
               </Routes>
             </AuthProvider>
           </BrowserRouter>
-        </div>
-      </ThemeProvider>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );
